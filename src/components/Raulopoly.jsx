@@ -1467,19 +1467,6 @@ export default function Raulopoly() {
       </div>
     );
   }
-              />
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={() => setScreen('menu')} style={btnStyle('#666')}>← Atrás</button>
-          <button onClick={startGame} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '8px 24px' }}>
-            🚀 ¡EMPEZAR CAOS!
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // ========================= GAME SCREEN =========================
 

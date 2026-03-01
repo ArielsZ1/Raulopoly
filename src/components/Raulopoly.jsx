@@ -278,6 +278,114 @@ export default function Raulopoly() {
     }
   }, []);
 
+  const [language, setLanguage] = useState('es'); // 'es' o 'en'
+  const [turnTimer, setTurnTimer] = useState(60);
+  const [showHelp, setShowHelp] = useState(false);
+
+  // Objeto de traducciones
+  const TRANSLATIONS = {
+    es: {
+      title: 'RAULOPOLY',
+      subtitle: 'EL MONOPOLY DEL CAOS GALÁCTICO',
+      play: 'JUGAR',
+      rules: 'Reglas del juego',
+      understood: '¡Entendido, vamos!',
+      cancel: 'Cancelar',
+      config: 'CONFIGURACIÓN',
+      customize: 'Personaliza tu partida',
+      players: 'Número de jugadores',
+      names: 'Nombres',
+      advancedSettings: 'Configuración Avanzada',
+      initialMoney: 'Dinero inicial',
+      rentMultiplier: 'Multiplicador de alquiler',
+      chaosChance: 'Probabilidad Dado del Caos',
+      start: '¡COMENZAR!',
+      back: 'Atrás',
+      resume: '⏳ REANUDAR ÚLTIMA PARTIDA',
+      delete: 'Borrar',
+      help: '?',
+      turnTime: 'Tiempo restante:',
+      helpTitle: 'Ayuda - Tipos de Casilla',
+      close: 'Cerrar',
+    },
+    en: {
+      title: 'RAULOPOLY',
+      subtitle: 'THE GALACTIC CHAOS MONOPOLY',
+      play: 'PLAY',
+      rules: 'Game Rules',
+      understood: 'Got it, let\'s play!',
+      cancel: 'Cancel',
+      config: 'CONFIGURATION',
+      customize: 'Customize your game',
+      players: 'Number of players',
+      names: 'Names',
+      advancedSettings: 'Advanced Settings',
+      initialMoney: 'Initial money',
+      rentMultiplier: 'Rent multiplier',
+      chaosChance: 'Chaos Die probability',
+      start: 'START!',
+      back: 'Back',
+      resume: '⏳ RESUME LAST GAME',
+      delete: 'Delete',
+      help: '?',
+      turnTime: 'Time left:',
+      helpTitle: 'Help - Square Types',
+      close: 'Close',
+    }
+  };
+
+  const t = TRANSLATIONS[language];
+
+  // Timer effect - reduce 1 segundo cada segundo durante el juego
+  useEffect(() => {
+    if (screen !== 'game' || phase === 'card' || phase === 'buydecision' || phase === 'payrent' || phase === 'endturn') {
+      return;
+    }
+    const timer = setInterval(() => {
+      setTurnTimer(prev => {
+        if (prev <= 1) {
+          playSound('jail'); // sonido de alerta
+          nextTurn(players, currentIdx);
+          return 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [screen, phase, players, currentIdx, playSound, nextTurn]);
+
+  // Resetear timer al cambiar de turno
+  useEffect(() => {
+    setTurnTimer(60);
+  }, [currentIdx]);
+
+  const SQUARE_INFO = {
+    es: {
+      go: { name: 'SALIDA', desc: 'Cobra $200 al pasar. El inicio del viaje galáctico.' },
+      property: { name: 'PROPIEDAD', desc: 'Compra para dominar un color, o paga alquiler. Con monopolio, el alquiler se duplica.' },
+      railroad: { name: 'ESTACIÓN', desc: 'Transporte espacial. El alquiler se duplica con cada estación extra.' },
+      utility: { name: 'SERVICIO', desc: 'Recursos cósmicos. Alquiler = (dados × 4) o (dados × 10) si tienes ambos.' },
+      tax: { name: 'IMPUESTO', desc: 'Pagas al banco. Tu dinero va al Jackpot Galáctico.' },
+      jail: { name: 'CÁRCEL/VISITA', desc: 'Estancia obligatoria 3 turnos. O paga $50 para salir, o saca dobles.' },
+      freeparking: { name: 'JACKPOT', desc: '¡Fortune! Cobra TODO lo acumulado en impuestos y casillas de caos.' },
+      chance: { name: 'PODER DEL CAOS', desc: 'Efecto aleatorio benéfico: movimiento, dinero, o cartas mágicas.' },
+      chest: { name: 'CAJA DEL CAOS', desc: 'Efecto aleatorio EXTREMO: puede arruinarte o salvarte. ¡El caos reina!' },
+      gotojail: { name: 'TELETRANSPORTADOR', desc: 'Te envía directo a la CÁRCEL. Sin cobrar $200. Atajo oscuro.' },
+    },
+    en: {
+      go: { name: 'GO', desc: 'Collect $200 when you pass. The start of your galactic journey.' },
+      property: { name: 'PROPERTY', desc: 'Buy to corner a color or pay rent. With monopoly, rent doubles.' },
+      railroad: { name: 'STATION', desc: 'Space transport. Rent doubles with each extra station.' },
+      utility: { name: 'UTILITY', desc: 'Cosmic resources. Rent = (dice × 4) or (dice × 10) if you have both.' },
+      tax: { name: 'TAX', desc: 'You pay the bank. Your money goes to the Galactic Jackpot.' },
+      jail: { name: 'JAIL/VISIT', desc: 'Mandatory 3-turn stay. Or pay $50 to leave, or roll doubles.' },
+      freeparking: { name: 'JACKPOT', desc: 'Fortune! Collect ALL accumulated wealth from taxes and chaos squares.' },
+      chance: { name: 'POWER OF CHAOS', desc: 'Random beneficial effect: movement, money, or magical cards.' },
+      chest: { name: 'CHAOS BOX', desc: 'Extreme random effect: can bankrupt or save you. Chaos reigns!' },
+      gotojail: { name: 'TELEPORTER', desc: 'Sends you straight to JAIL. Without collecting $200. Dark shortcut.' },
+    }
+  };
+
   // texto de reglas que se muestra antes de arrancar el juego
   const RULES_TEXT = [
     "Cada jugador comienza con $1500.",
@@ -962,6 +1070,10 @@ export default function Raulopoly() {
     );
   }
 
+  const getSquareInfo = (squareType) => {
+    return SQUARE_INFO[language][squareType] || { name: 'Unknown', desc: 'Unknown square' };
+  };
+
   function renderCenter() {
     const p = players[currentIdx];
     if (!p) return null;
@@ -1075,8 +1187,18 @@ export default function Raulopoly() {
               <div style={{ fontSize: 10, color: p.color, marginBottom: 4, fontFamily: '"Orbitron", sans-serif' }}>
                 Turno de {p.emoji} {p.name}
               </div>
+              {/* Timer bar */}
+              <div style={{ width: '100%', marginBottom: 6, background: '#000', border: '1px solid #444', borderRadius: 2, height: 8, overflow: 'hidden' }}>
+                <div style={{
+                  width: `${(turnTimer/60)*100}%`,
+                  height: '100%',
+                  background: turnTimer > 20 ? '#44ff88' : turnTimer > 10 ? '#ffaa00' : '#ff4444',
+                  transition: 'width 0.3s, background 0.3s',
+                }}></div>
+              </div>
+              <div style={{ fontSize: 8, color: '#8899aa', marginBottom: 6 }}>{t.turnTime} {turnTimer}s</div>
               <button onClick={doRoll} style={btnStyle('#44aaff')}>
-                🎲 ¡LANZAR DADOS!
+                🎲 {t.play} DADOS!
               </button>
             </div>
           )}
@@ -1260,6 +1382,10 @@ export default function Raulopoly() {
         gap: 30,
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+        <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 10 }}>
+          <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 12 }}>ES</button>
+          <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 12 }}>EN</button>
+        </div>
         <div style={{
           fontSize: 56, fontWeight: 900,
           background: 'linear-gradient(135deg, #ff4488, #44aaff, #44ff88, #ffdd44)',
@@ -1268,10 +1394,10 @@ export default function Raulopoly() {
           textShadow: 'none',
           animation: 'pulse 2s infinite',
         }}>
-          RAULOPOLY
+          {t.title}
         </div>
         <div style={{ color: '#8899aa', fontSize: 13, letterSpacing: 3 }}>
-          EL MONOPOLY DEL CAOS GALÁCTICO
+          {t.subtitle}
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 600, fontSize: 11, color: '#667788' }}>
           {[
@@ -1294,12 +1420,12 @@ export default function Raulopoly() {
               ⏳ REANUDAR ÚTIMA PARTIDA
             </button>
             <button onClick={() => { localStorage.removeItem('raulopolyGame'); setHasSavedGame(false); }} style={{ ...btnStyle('#aa4444'), fontSize: 12, padding: '6px 12px' }}>
-              Borrar
+              {t.delete}
             </button>
           </div>
         )}
         <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#44aaff'), fontSize: 16, padding: '10px 30px' }}>
-          🚀 JUGAR
+          🚀 {t.play}
         </button>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }`}</style>
       </div>
@@ -1320,7 +1446,7 @@ export default function Raulopoly() {
         color: '#fff'
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
-        <div style={{ fontSize: 36, fontWeight: 900 }}>Reglas de Raulopoly</div>
+        <div style={{ fontSize: 36, fontWeight: 900 }}>{t.rules}</div>
         <div style={{ maxWidth: 600, textAlign: 'left', fontSize: 14 }}>
           <ul style={{ paddingLeft: 20 }}>
             {RULES_TEXT.map((r, i) => <li key={i} style={{ marginBottom: 6 }}>{r}</li>)}
@@ -1328,10 +1454,10 @@ export default function Raulopoly() {
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <button onClick={() => setScreen('setup')} style={{ ...btnStyle('#44aaff'), fontSize: 14, padding: '8px 24px' }}>
-            ¡COMENZAR EL JUEGO!
+            {t.understood}
           </button>
           <button onClick={() => setScreen('menu')} style={{ ...btnStyle('#aa4444'), fontSize: 14, padding: '8px 24px' }}>
-            Volver
+            {t.back}
           </button>
         </div>
       </div>
@@ -1354,12 +1480,12 @@ export default function Raulopoly() {
         padding: '20px',
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
-        <div style={{ fontSize: 28, fontWeight: 900, color: '#44aaff', letterSpacing: 4 }}>CONFIGURACIÓN</div>
-        <div style={{ fontSize: 12, color: '#8899aa' }}>Personaliza tu partida</div>
+        <div style={{ fontSize: 28, fontWeight: 900, color: '#44aaff', letterSpacing: 4 }}>{t.config}</div>
+        <div style={{ fontSize: 12, color: '#8899aa' }}>{t.customize}</div>
         
         {/* Selección de jugadores */}
         <div style={{ width: 400, background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: 12 }}>
-          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>NÚmero de jugadores</div>
+          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t.players}</div>
           <div style={{ display: 'flex', gap: 10 }}>
             {[2, 3, 4].map(n => (
               <button key={n} onClick={() => setNumPlayers(n)} style={{
@@ -1374,7 +1500,7 @@ export default function Raulopoly() {
         
         {/* Nombres de jugadores */}
         <div style={{ width: 400, background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: 12 }}>
-          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>Nombres</div>
+          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t.names}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {Array.from({ length: numPlayers }, (_, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1403,7 +1529,7 @@ export default function Raulopoly() {
         
         {/* Botón para mostrar/ocultar configuración avanzada */}
         <button onClick={() => setShowAdvancedSettings(!showAdvancedSettings)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '6px 16px' }}>
-          {showAdvancedSettings ? '⌄' : '⌃'} Configuración Avanzada
+          {showAdvancedSettings ? '⌄' : '⌃'} {t.advancedSettings}
         </button>
         
         {/* Configuración avanzada */}
@@ -1413,7 +1539,7 @@ export default function Raulopoly() {
             
             {/* Dinero inicial */}
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>Dinero inicial: ${initialMoney}</div>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t.initialMoney}: ${initialMoney}</div>
               <input 
                 type="range" 
                 min="500" 
@@ -1427,7 +1553,7 @@ export default function Raulopoly() {
             
             {/* Multiplicador de alquiler */}
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>Multiplicador de alquiler: x{rentMultiplier.toFixed(1)}</div>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t.rentMultiplier}: x{rentMultiplier.toFixed(1)}</div>
               <input 
                 type="range" 
                 min="0.5" 
@@ -1441,7 +1567,7 @@ export default function Raulopoly() {
             
             {/* Probabilidad de Caos */}
             <div style={{ marginBottom: 6 }}>
-              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>Probabilidad Dado del Caos: {(chaosChance*100).toFixed(0)}%</div>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t.chaosChance}: {(chaosChance*100).toFixed(0)}%</div>
               <input 
                 type="range" 
                 min="0" 
@@ -1458,10 +1584,10 @@ export default function Raulopoly() {
         {/* Botones de acción */}
         <div style={{ display: 'flex', gap: 12 }}>
           <button onClick={startGame} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '8px 24px' }}>
-            🚀 ¡COMENZAR!
+            🚀 {t.start}
           </button>
           <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#aa4444'), fontSize: 14, padding: '8px 24px' }}>
-            Atrás
+            {t.back}
           </button>
         </div>
       </div>
@@ -1481,6 +1607,51 @@ export default function Raulopoly() {
       boxSizing: 'border-box',
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+      {/* Help Modal */}
+      {showHelp && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: '#00000088',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }} onClick={() => setShowHelp(false)}>
+          <div style={{
+            background: '#0a1525',
+            border: '2px solid #44aaff',
+            borderRadius: 8,
+            padding: 20,
+            maxWidth: 400,
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            fontFamily: '"Orbitron", sans-serif',
+            color: '#fff',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: '#44aaff' }}>{t.helpTitle}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 11 }}>
+              {Object.entries(SQUARE_INFO[language]).map(([key, info]) => (
+                <div key={key} style={{ background: '#0a2030', border: '1px solid #1a3a4a', borderRadius: 4, padding: 8 }}>
+                  <div style={{ color: '#44ff88', fontWeight: 700, marginBottom: 4 }}>{info.name}</div>
+                  <div style={{ color: '#8899aa', fontSize: 9, lineHeight: 1.3 }}>{info.desc}</div>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setShowHelp(false)} style={{ ...btnStyle('#44aaff'), marginTop: 12, width: '100%' }}>
+              {t.close}
+            </button>
+          </div>
+        </div>
+      )}
+      {/* Top-right controls */}
+      <div style={{ position: 'fixed', top: 10, right: 10, display: 'flex', gap: 8, zIndex: 100 }}>
+        <button onClick={() => setShowHelp(!showHelp)} style={{ ...btnStyle('#ffaa00'), fontSize: 14 }}>
+          {t.help}
+        </button>
+        <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 11 }}>ES</button>
+        <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 11 }}>EN</button>
+      </div>
       <div style={{ position: 'relative', width: BOARD_SIZE, height: BOARD_SIZE, flexShrink: 0 }}>
         {/* Board border glow */}
         <div style={{

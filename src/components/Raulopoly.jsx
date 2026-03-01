@@ -179,6 +179,104 @@ export default function Raulopoly() {
   const [ghostTarget, setGhostTarget]   = useState(null);
   const [pendingGhostSteal, setPendingGhostSteal] = useState(null);
   const [playerNames, setPlayerNames]   = useState(PLAYER_CONFIGS.map(p => p.name));
+  const [initialMoney, setInitialMoney]      = useState(1500);
+  const [rentMultiplier, setRentMultiplier]  = useState(1);
+  const [chaosChance, setChaoschance]        = useState(0.30);
+  const [hasSavedGame, setHasSavedGame]      = useState(!!localStorage.getItem('raulopolyGame'));
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+
+  // Función para guardar partida en localStorage
+  const saveGame = useCallback(() => {
+    const gameState = {
+      screen, numPlayers, players, currentIdx, phase, dice, chaosDie,
+      propOwners, propHouses, log, jackpot, activeCard, doubleRentTurns,
+      pendingBuy, pendingRent, winner, playerNames,
+      settings: { initialMoney, rentMultiplier, chaosChance }
+    };
+    localStorage.setItem('raulopolyGame', JSON.stringify(gameState));
+  }, [screen, numPlayers, players, currentIdx, phase, dice, chaosDie, propOwners, propHouses, log, jackpot, activeCard, doubleRentTurns, pendingBuy, pendingRent, winner, playerNames, initialMoney, rentMultiplier, chaosChance]);
+
+  // Función para cargar partida desde localStorage
+  const loadGame = useCallback(() => {
+    const saved = localStorage.getItem('raulopolyGame');
+    if (saved) {
+      try {
+        const gameState = JSON.parse(saved);
+        setNumPlayers(gameState.numPlayers);
+        setPlayers(gameState.players);
+        setCurrentIdx(gameState.currentIdx);
+        setPhase(gameState.phase);
+        setDice(gameState.dice);
+        setChaosDie(gameState.chaosDie);
+        setPropOwners(gameState.propOwners);
+        setPropHouses(gameState.propHouses);
+        setLog(gameState.log);
+        setJackpot(gameState.jackpot);
+        setActiveCard(gameState.activeCard);
+        setDoubleRentTurns(gameState.doubleRentTurns);
+        setPendingBuy(gameState.pendingBuy);
+        setPendingRent(gameState.pendingRent);
+        setWinner(gameState.winner);
+        setPlayerNames(gameState.playerNames);
+        setInitialMoney(gameState.settings.initialMoney);
+        setRentMultiplier(gameState.settings.rentMultiplier);
+        setChaoschance(gameState.settings.chaosChance);
+        setScreen('game');
+      } catch (e) {
+        console.error('Error al cargar partida:', e);
+      }
+    }
+  }, []);
+
+  // Guardar partida periódicamente durante el juego
+  useEffect(() => {
+    if (screen === 'game') {
+      saveGame();
+    }
+  }, [screen, players, currentIdx, phase, saveGame]);
+
+  // Función para reproducir sonido simple
+  const playSound = useCallback((type) => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    switch(type) {
+      case 'cash':
+        oscillator.frequency.value = 800;
+        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+        break;
+      case 'chaos':
+        oscillator.frequency.value = 300;
+        gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+        break;
+      case 'jail':
+        for (let i = 0; i < 3; i++) {
+          oscillator.frequency.setValueAtTime(600 - i*100, audioContext.currentTime + i*0.1);
+        }
+        gain.gain.setValueAtTime(0.25, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+        break;
+      case 'success':
+        oscillator.frequency.value = 1200;
+        gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.15);
+        break;
+      default: break;
+    }
+  }, []);
 
   // texto de reglas que se muestra antes de arrancar el juego
   const RULES_TEXT = [
@@ -199,7 +297,10 @@ export default function Raulopoly() {
 
   function startGame() {
     const ps = createPlayers(numPlayers);
-    ps.forEach((p, i) => { p.name = playerNames[i] || PLAYER_CONFIGS[i].name; });
+    ps.forEach((p, i) => { 
+      p.name = playerNames[i] || PLAYER_CONFIGS[i].name;
+      p.money = initialMoney;  // Usar dinero inicial personalizado
+    });
     setPlayers(ps);
     setPropOwners({});
     setPropHouses({});
@@ -213,6 +314,7 @@ export default function Raulopoly() {
     setWinner(null);
     setDoubleRentTurns(0);
     setScreen('game');
+    playSound('success');
     addLog('¡RAULOPOLY HA COMENZADO! 🚀 ¡Que el caos os acompañe!', 'event');
   }
 
@@ -244,6 +346,7 @@ export default function Raulopoly() {
   }
 
   function doTransfer(fromIdx, toIdx, amount, reason) {
+    playSound('cash');
     setPlayers(prev => {
       const next = prev.map(p => ({ ...p }));
       const actual = Math.min(amount, Math.max(0, next[fromIdx].money));
@@ -303,6 +406,7 @@ export default function Raulopoly() {
 
     if (sq.type === 'gotojail') {
       addLog(`🌀 ¡TELETRANSPORTE a la CÁRCEL! ${player.name} desaparece de la existencia momentáneamente...`, 'event');
+      playSound('jail');
       setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, position: 10, inJail: true, jailTurns: 0 } : p));
       setPhase('endturn');
       return;
@@ -329,6 +433,7 @@ export default function Raulopoly() {
 
     if (sq.type === 'chance') {
       const card = POWER_CARDS[Math.floor(Math.random() * POWER_CARDS.length)];
+      playSound('success');
       setActiveCard({ ...card, source: 'chance' });
       setPhase('card');
       return;
@@ -336,6 +441,7 @@ export default function Raulopoly() {
 
     if (sq.type === 'chest') {
       const card = CHAOS_CARDS[Math.floor(Math.random() * CHAOS_CARDS.length)];
+      playSound('chaos');
       setActiveCard({ ...card, source: 'chest' });
       setPhase('card');
       return;
@@ -1182,6 +1288,16 @@ export default function Raulopoly() {
             </div>
           ))}
         </div>
+        {hasSavedGame && (
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button onClick={loadGame} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '8px 20px' }}>
+              ⏳ REANUDAR ÚTIMA PARTIDA
+            </button>
+            <button onClick={() => { localStorage.removeItem('raulopolyGame'); setHasSavedGame(false); }} style={{ ...btnStyle('#aa4444'), fontSize: 12, padding: '6px 12px' }}>
+              Borrar
+            </button>
+          </div>
+        )}
         <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#44aaff'), fontSize: 16, padding: '10px 30px' }}>
           🚀 JUGAR
         </button>
@@ -1233,39 +1349,124 @@ export default function Raulopoly() {
         fontFamily: '"Orbitron", sans-serif',
         flexDirection: 'column',
         gap: 20,
+        color: '#fff',
+        overflowY: 'auto',
+        padding: '20px',
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
         <div style={{ fontSize: 28, fontWeight: 900, color: '#44aaff', letterSpacing: 4 }}>CONFIGURACIÓN</div>
-        <div style={{ fontSize: 12, color: '#8899aa' }}>¿Cuántos jugadores van a arruinarse hoy?</div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {[2, 3, 4].map(n => (
-            <button key={n} onClick={() => setNumPlayers(n)} style={{
-              ...btnStyle(numPlayers === n ? '#44aaff' : '#334455'),
-              fontSize: 18, padding: '8px 20px',
-            }}>
-              {n}
-            </button>
-          ))}
+        <div style={{ fontSize: 12, color: '#8899aa' }}>Personaliza tu partida</div>
+        
+        {/* Selección de jugadores */}
+        <div style={{ width: 400, background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: 12 }}>
+          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>NÚmero de jugadores</div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            {[2, 3, 4].map(n => (
+              <button key={n} onClick={() => setNumPlayers(n)} style={{
+                ...btnStyle(numPlayers === n ? '#44aaff' : '#334455'),
+                fontSize: 14, padding: '6px 16px',
+              }}>
+                {n}
+              </button>
+            ))}
+          </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 300 }}>
-          {Array.from({ length: numPlayers }, (_, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 18 }}>{PLAYER_CONFIGS[i].emoji}</span>
-              <input
-                value={playerNames[i]}
-                onChange={e => setPlayerNames(prev => prev.map((n, j) => j === i ? e.target.value : n))}
-                style={{
-                  flex: 1,
-                  background: '#0a1520',
-                  border: `1px solid ${PLAYER_CONFIGS[i].color}`,
-                  borderRadius: 4,
-                  color: PLAYER_CONFIGS[i].color,
-                  padding: '4px 8px',
-                  fontFamily: '"Orbitron", sans-serif',
-                  fontSize: 11,
-                  outline: 'none',
-                }}
-                maxLength={12}
+        
+        {/* Nombres de jugadores */}
+        <div style={{ width: 400, background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: 12 }}>
+          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>Nombres</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {Array.from({ length: numPlayers }, (_, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 14 }}>{PLAYER_CONFIGS[i].emoji}</span>
+                <input
+                  value={playerNames[i]}
+                  onChange={e => setPlayerNames(prev => prev.map((n, j) => j === i ? e.target.value : n))}
+                  style={{
+                    flex: 1,
+                    background: '#0a1520',
+                    border: `1px solid ${PLAYER_CONFIGS[i].color}`,
+                    borderRadius: 4,
+                    color: PLAYER_CONFIGS[i].color,
+                    padding: '4px 8px',
+                    fontFamily: '"Orbitron", sans-serif',
+                    fontSize: 10,
+                    outline: 'none',
+                  }}
+                  placeholder={`Jugador ${i+1}`}
+                  maxLength={12}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Botón para mostrar/ocultar configuración avanzada */}
+        <button onClick={() => setShowAdvancedSettings(!showAdvancedSettings)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '6px 16px' }}>
+          {showAdvancedSettings ? '⌄' : '⌃'} Configuración Avanzada
+        </button>
+        
+        {/* Configuración avanzada */}
+        {showAdvancedSettings && (
+          <div style={{ width: 400, background: '#0a1520', border: '1px solid #aa6600', borderRadius: 8, padding: 12 }}>
+            <div style={{ fontSize: 12, color: '#ff9966', marginBottom: 12, fontWeight: 'bold' }}>Reglas personalizadas:</div>
+            
+            {/* Dinero inicial */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>Dinero inicial: ${initialMoney}</div>
+              <input 
+                type="range" 
+                min="500" 
+                max="3000" 
+                step="100" 
+                value={initialMoney}
+                onChange={e => setInitialMoney(Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+            </div>
+            
+            {/* Multiplicador de alquiler */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>Multiplicador de alquiler: x{rentMultiplier.toFixed(1)}</div>
+              <input 
+                type="range" 
+                min="0.5" 
+                max="2" 
+                step="0.1" 
+                value={rentMultiplier}
+                onChange={e => setRentMultiplier(Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+            </div>
+            
+            {/* Probabilidad de Caos */}
+            <div style={{ marginBottom: 6 }}>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>Probabilidad Dado del Caos: {(chaosChance*100).toFixed(0)}%</div>
+              <input 
+                type="range" 
+                min="0" 
+                max="1" 
+                step="0.05" 
+                value={chaosChance}
+                onChange={e => setChaoschance(Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Botones de acción */}
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={startGame} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '8px 24px' }}>
+            🚀 ¡COMENZAR!
+          </button>
+          <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#aa4444'), fontSize: 14, padding: '8px 24px' }}>
+            Atrás
+          </button>
+        </div>
+      </div>
+    );
+  }
               />
             </div>
           ))}

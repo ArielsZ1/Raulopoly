@@ -158,6 +158,7 @@ function createPlayers(num) {
 // ========================= MAIN COMPONENT =========================
 
 export default function Raulopoly() {
+  // pantalla actual: menu, rules, game, winner
   const [screen, setScreen]             = useState('menu');
   const [numPlayers, setNumPlayers]     = useState(2);
   const [players, setPlayers]           = useState([]);
@@ -178,6 +179,19 @@ export default function Raulopoly() {
   const [ghostTarget, setGhostTarget]   = useState(null);
   const [pendingGhostSteal, setPendingGhostSteal] = useState(null);
   const [playerNames, setPlayerNames]   = useState(PLAYER_CONFIGS.map(p => p.name));
+
+  // texto de reglas que se muestra antes de arrancar el juego
+  const RULES_TEXT = [
+    "Cada jugador comienza con $1500.",
+    "El tablero tiene 40 casillas: propiedades, estaciones, servicios, impuestos y cartas de caos/poder.",
+    "Al pasar por SALIDA cobras $200.",
+    "Si caes en una propiedad sin dueño puedes comprarla; de lo contrario pagas alquiler.",
+    "Alquileres se duplican si el propietario tiene el monopolio del color.",
+    "Llegar a 0 dinero te convierte en fantasma: no puedes comprar pero puedes seguir cobrando de otros.",
+    "Las cartas de CAOS y PODER provocan efectos especiales (vean la pantalla de juego para más detalles).",
+    "El dado caótico (probabilidad 30%) puede activar un tercer dado especial.",
+    "La primera persona con dinero al final elimina a los demás y gana el juego."
+  ];
 
   const addLog = useCallback((msg, type = 'normal') => {
     setLog(prev => [{ msg, type, id: Date.now() + Math.random() }, ...prev].slice(0, 30));
@@ -1168,10 +1182,42 @@ export default function Raulopoly() {
             </div>
           ))}
         </div>
-        <button onClick={() => setScreen('setup')} style={{ ...btnStyle('#44aaff'), fontSize: 16, padding: '10px 30px' }}>
+        <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#44aaff'), fontSize: 16, padding: '10px 30px' }}>
           🚀 JUGAR
         </button>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }`}</style>
+      </div>
+    );
+  }
+
+  if (screen === 'rules') {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'radial-gradient(ellipse at center, #0a1525 0%, #020812 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: '"Orbitron", sans-serif',
+        flexDirection: 'column',
+        gap: 20,
+        color: '#fff'
+      }}>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+        <div style={{ fontSize: 36, fontWeight: 900 }}>Reglas de Raulopoly</div>
+        <div style={{ maxWidth: 600, textAlign: 'left', fontSize: 14 }}>
+          <ul style={{ paddingLeft: 20 }}>
+            {RULES_TEXT.map((r, i) => <li key={i} style={{ marginBottom: 6 }}>{r}</li>)}
+          </ul>
+        </div>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={() => setScreen('setup')} style={{ ...btnStyle('#44aaff'), fontSize: 14, padding: '8px 24px' }}>
+            ¡COMENZAR EL JUEGO!
+          </button>
+          <button onClick={() => setScreen('menu')} style={{ ...btnStyle('#aa4444'), fontSize: 14, padding: '8px 24px' }}>
+            Volver
+          </button>
+        </div>
       </div>
     );
   }

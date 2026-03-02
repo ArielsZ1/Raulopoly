@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "../i18n/I18nProvider";
+import { clearSavedGame, getSavedGame, getTutorialSeen, setSavedGame, setTutorialSeen } from "../services/storageService";
 
 // ========================= GAME DATA =========================
 
@@ -184,7 +185,7 @@ export default function Raulopoly() {
   const [initialMoney, setInitialMoney]      = useState(1500);
   const [rentMultiplier, setRentMultiplier]  = useState(1);
   const [chaosChance, setChaoschance]        = useState(0.30);
-  const [hasSavedGame, setHasSavedGame]      = useState(!!localStorage.getItem('raulopolyGame'));
+  const [hasSavedGame, setHasSavedGame]      = useState(!!getSavedGame());
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
   // Función para guardar partida en localStorage
@@ -195,15 +196,13 @@ export default function Raulopoly() {
       pendingBuy, pendingRent, winner, playerNames,
       settings: { initialMoney, rentMultiplier, chaosChance }
     };
-    localStorage.setItem('raulopolyGame', JSON.stringify(gameState));
+    setSavedGame(gameState);
   }, [screen, numPlayers, players, currentIdx, phase, dice, chaosDie, propOwners, propHouses, log, jackpot, activeCard, doubleRentTurns, pendingBuy, pendingRent, winner, playerNames, initialMoney, rentMultiplier, chaosChance]);
 
   // Función para cargar partida desde localStorage
   const loadGame = useCallback(() => {
-    const saved = localStorage.getItem('raulopolyGame');
-    if (saved) {
-      try {
-        const gameState = JSON.parse(saved);
+    const gameState = getSavedGame();
+    if (gameState) {
         setNumPlayers(gameState.numPlayers);
         setPlayers(gameState.players);
         setCurrentIdx(gameState.currentIdx);
@@ -220,13 +219,10 @@ export default function Raulopoly() {
         setPendingRent(gameState.pendingRent);
         setWinner(gameState.winner);
         setPlayerNames(gameState.playerNames);
-        setInitialMoney(gameState.settings.initialMoney);
-        setRentMultiplier(gameState.settings.rentMultiplier);
-        setChaoschance(gameState.settings.chaosChance);
+        setInitialMoney(gameState.settings?.initialMoney ?? 1500);
+        setRentMultiplier(gameState.settings?.rentMultiplier ?? 1);
+        setChaoschance(gameState.settings?.chaosChance ?? 0.30);
         setScreen('game');
-      } catch (e) {
-        console.error('Error al cargar partida:', e);
-      }
     }
   }, []);
 
@@ -282,14 +278,7 @@ export default function Raulopoly() {
 
   const [turnTimer, setTurnTimer] = useState(60);
   const [showHelp, setShowHelp] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(() => {
-    try {
-      const seen = localStorage.getItem('raulopolyTutorialSeen');
-      return !seen; // Mostrar solo si no ha sido visto
-    } catch (e) {
-      return false; // Si hay error, no mostrar tutorial
-    }
-  });
+  const [showTutorial, setShowTutorial] = useState(() => !getTutorialSeen());
 
   const features = t('features', { returnObjects: true }) || [];
   const squareInfo = t('squareInfo', { returnObjects: true }) || {};
@@ -1311,14 +1300,14 @@ export default function Raulopoly() {
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button onClick={() => {
-              localStorage.setItem('raulopolyTutorialSeen', 'true');
+              setTutorialSeen(true);
               setShowTutorial(false);
               setScreen('rules');
             }} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '10px 30px', width: 'auto' }}>
               {t('startGame')}
             </button>
             <button onClick={() => {
-              localStorage.setItem('raulopolyTutorialSeen', 'true');
+              setTutorialSeen(true);
               setShowTutorial(false);
             }} style={{ ...btnStyle('#666'), fontSize: 12, padding: '8px 20px', width: 'auto' }}>
               {t('skipTutorial')}
@@ -1402,7 +1391,7 @@ export default function Raulopoly() {
             <button onClick={loadGame} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '8px 20px' }}>
               ⏳ REANUDAR ÚTIMA PARTIDA
             </button>
-            <button onClick={() => { localStorage.removeItem('raulopolyGame'); setHasSavedGame(false); }} style={{ ...btnStyle('#aa4444'), fontSize: 12, padding: '6px 12px' }}>
+            <button onClick={() => { clearSavedGame(); setHasSavedGame(false); }} style={{ ...btnStyle('#aa4444'), fontSize: 12, padding: '6px 12px' }}>
               {t('delete')}
             </button>
           </div>

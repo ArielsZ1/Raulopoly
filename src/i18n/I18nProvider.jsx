@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import es from './locales/es/translation.json';
 import en from './locales/en/translation.json';
+import { getLanguage, setLanguage as setStoredLanguage } from '../services/storageService';
 
-const STORAGE_KEY = 'raulopolyLanguage';
 const resources = { es, en };
 const fallbackLng = 'es';
 
@@ -11,7 +11,7 @@ const I18nContext = createContext(null);
 const getByPath = (obj, path) => path.split('.').reduce((acc, key) => acc?.[key], obj);
 
 const getInitialLanguage = () => {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = getLanguage();
   if (stored && resources[stored]) return stored;
 
   const browserLang = navigator.language?.split('-')[0];
@@ -22,7 +22,7 @@ export function I18nProvider({ children }) {
   const [language, setLanguage] = useState(getInitialLanguage);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, language);
+    setStoredLanguage(language);
     document.documentElement.lang = language;
   }, [language]);
 

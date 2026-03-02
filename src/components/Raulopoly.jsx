@@ -212,41 +212,45 @@ export default function Raulopoly() {
   // Función para cargar partida desde localStorage
   const loadGame = useCallback(() => {
     let saved = null;
-    try {
-      saved = localStorage.getItem('raulopolyGame');
-    } catch (_) {
-      saved = null;
-    }
-    if (saved) {
-      try {
-        const gameState = JSON.parse(saved);
-        // NO DECLARAR gameState DE NUEVO aquí
-        if (gameState) {
-          setPlayers(gameState.players);
-          setCurrentIdx(gameState.currentIdx);
-          setPhase(gameState.phase);
-          setDice(gameState.dice);
-          setChaosDie(gameState.chaosDie);
-          setPropOwners(gameState.propOwners);
-          setPropHouses(gameState.propHouses);
-          setLog(gameState.log);
-          setJackpot(gameState.jackpot);
-          setActiveCard(gameState.activeCard);
-          setDoubleRentTurns(gameState.doubleRentTurns);
-          setPendingBuy(gameState.pendingBuy);
-          setPendingRent(gameState.pendingRent);
-          setWinner(gameState.winner);
-          setPlayerNames(gameState.playerNames);
-          setInitialMoney(gameState.settings?.initialMoney ?? 1500);
-          setRentMultiplier(gameState.settings?.rentMultiplier ?? 1);
-          setChaoschance(gameState.settings?.chaosChance ?? 0.30);
-          setScreen('game');
-        }
-      } catch (error) {
-        console.log('No saved game found');
-      }
-    }
-  }, []);
+try {
+  saved = localStorage.getItem('raulopolyGame');
+} catch (_) {
+  saved = null;
+}
+
+if (!saved) return;
+
+try {
+  const gameState = JSON.parse(saved);
+  if (!gameState) return;
+
+  setNumPlayers(gameState.numPlayers);
+  setPlayers(gameState.players);
+  setCurrentIdx(gameState.currentIdx);
+  setPhase(gameState.phase);
+  setDice(gameState.dice);
+  setChaosDie(gameState.chaosDie);
+  setPropOwners(gameState.propOwners);
+  setPropHouses(gameState.propHouses);
+  setLog(gameState.log);
+  setJackpot(gameState.jackpot);
+  setActiveCard(gameState.activeCard);
+  setDoubleRentTurns(gameState.doubleRentTurns);
+  setPendingBuy(gameState.pendingBuy);
+  setPendingRent(gameState.pendingRent);
+  setWinner(gameState.winner);
+  setPlayerNames(gameState.playerNames);
+
+  // settings seguros
+  setInitialMoney(gameState.settings?.initialMoney ?? 1500);
+  setRentMultiplier(gameState.settings?.rentMultiplier ?? 1);
+  setChaoschance(gameState.settings?.chaosChance ?? 0.30);
+
+  setScreen('game');
+} catch (error) {
+  console.error('Error loading saved game:', error);
+}
+    
 
   // Guardar partida periódicamente durante el juego
   useEffect(() => {

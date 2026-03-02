@@ -184,7 +184,13 @@ export default function Raulopoly() {
   const [initialMoney, setInitialMoney]      = useState(1500);
   const [rentMultiplier, setRentMultiplier]  = useState(1);
   const [chaosChance, setChaoschance]        = useState(0.30);
-  const [hasSavedGame, setHasSavedGame]      = useState(!!getSavedGame());
+  const [hasSavedGame, setHasSavedGame]      = useState(() => {
+    try {
+      return !!localStorage.getItem('raulopolyGame');
+    } catch (_) {
+      return false;
+    }
+  });
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
   // Función para guardar partida en localStorage

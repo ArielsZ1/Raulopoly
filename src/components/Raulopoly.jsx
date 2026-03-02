@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "../i18n/I18nProvider";
 
 // ========================= GAME DATA =========================
 
@@ -158,6 +159,7 @@ function createPlayers(num) {
 // ========================= MAIN COMPONENT =========================
 
 export default function Raulopoly() {
+  const { language, setLanguage, t } = useTranslation();
   // pantalla actual: menu, rules, game, winner
   const [screen, setScreen]             = useState('menu');
   const [numPlayers, setNumPlayers]     = useState(2);
@@ -278,7 +280,6 @@ export default function Raulopoly() {
     }
   }, []);
 
-  const [language, setLanguage] = useState('es'); // 'es' o 'en'
   const [turnTimer, setTurnTimer] = useState(60);
   const [showHelp, setShowHelp] = useState(false);
   const [showTutorial, setShowTutorial] = useState(() => {
@@ -290,85 +291,9 @@ export default function Raulopoly() {
     }
   });
 
-  // Objeto de traducciones
-  const TRANSLATIONS = {
-    es: {
-      title: 'RAULOPOLY',
-      subtitle: 'EL MONOPOLY DEL CAOS GALÁCTICO',
-      play: 'JUGAR',
-      rules: 'Reglas del juego',
-      understood: '¡Entendido, vamos!',
-      cancel: 'Cancelar',
-      config: 'CONFIGURACIÓN',
-      customize: 'Personaliza tu partida',
-      players: 'Número de jugadores',
-      names: 'Nombres',
-      advancedSettings: 'Configuración Avanzada',
-      initialMoney: 'Dinero inicial',
-      rentMultiplier: 'Multiplicador de alquiler',
-      chaosChance: 'Probabilidad Dado del Caos',
-      start: '¡COMENZAR!',
-      back: 'Atrás',
-      resume: '⏳ REANUDAR ÚLTIMA PARTIDA',
-      delete: 'Borrar',
-      help: '?',
-      turnTime: 'Tiempo restante:',
-      helpTitle: 'Ayuda - Tipos de Casilla',
-      close: 'Cerrar',
-      tutorial: 'Tutorial Interactivo',
-      tutorialIntro: '¡Bienvenido a RAULOPOLY!',
-      tutorialDesc: 'Tu objetivo es convertirte en el jugador más rico mientras navegas un tablero galáctico caótico. ¡Compra propiedades, cobra alquiler y sobrevive el caos!',
-      features: [
-        { title: '🎲 Dado del Caos', desc: '30% de efectos salvajes en cada turno' },
-        { title: '👻 Modo Fantasma', desc: 'Los arruinados se convierten en espectros vengativos' },
-        { title: '🎰 Jackpot Galáctico', desc: 'El parking libre acumula dinero REAL' },
-        { title: '☄️ Meteoritos', desc: 'Las casas pueden ser destruidas en cualquier momento' },
-        { title: '🔀 Teletransportadores', desc: 'El tablero te mueve a donde no quieres' },
-        { title: '🦹 Robo Cuántico', desc: 'Puedes robar dinero y propiedades a otros' },
-      ],
-      startGame: 'Comenzar Juego',
-      skipTutorial: 'Saltar Tutorial',
-    },
-    en: {
-      title: 'RAULOPOLY',
-      subtitle: 'THE GALACTIC CHAOS MONOPOLY',
-      play: 'PLAY',
-      rules: 'Game Rules',
-      understood: 'Got it, let\'s play!',
-      cancel: 'Cancel',
-      config: 'CONFIGURATION',
-      customize: 'Customize your game',
-      players: 'Number of players',
-      names: 'Names',
-      advancedSettings: 'Advanced Settings',
-      initialMoney: 'Initial money',
-      rentMultiplier: 'Rent multiplier',
-      chaosChance: 'Chaos Die probability',
-      start: 'START!',
-      back: 'Back',
-      resume: '⏳ RESUME LAST GAME',
-      delete: 'Delete',
-      help: '?',
-      turnTime: 'Time left:',
-      helpTitle: 'Help - Square Types',
-      close: 'Close',
-      tutorial: 'Interactive Tutorial',
-      tutorialIntro: 'Welcome to RAULOPOLY!',
-      tutorialDesc: 'Your goal is to become the richest player while navigating a chaotic galactic board. Buy properties, collect rent, and survive the chaos!',
-      features: [
-        { title: '🎲 Chaos Die', desc: '30% wild effects each turn' },
-        { title: '👻 Ghost Mode', desc: 'Bankrupt players become vengeful specters' },
-        { title: '🎰 Galactic Jackpot', desc: 'Free parking accumulates REAL money' },
-        { title: '☄️ Meteorites', desc: 'Houses can be destroyed anytime' },
-        { title: '🔀 Teleporters', desc: 'The board moves you where you don\'t want' },
-        { title: '🦹 Quantum Theft', desc: 'You can steal money and properties from others' },
-      ],
-      startGame: 'Start Game',
-      skipTutorial: 'Skip Tutorial',
-    }
-  };
-
-  const t = TRANSLATIONS[language];
+  const features = t('features', { returnObjects: true }) || [];
+  const squareInfo = t('squareInfo', { returnObjects: true }) || {};
+  const rulesText = t('rulesText', { returnObjects: true }) || [];
 
   // Timer effect - reduce 1 segundo cada segundo durante el juego
   useEffect(() => {
@@ -392,46 +317,6 @@ export default function Raulopoly() {
   useEffect(() => {
     setTurnTimer(60);
   }, [currentIdx]);
-
-  const SQUARE_INFO = {
-    es: {
-      go: { name: 'SALIDA', desc: 'Cobra $200 al pasar. El inicio del viaje galáctico.' },
-      property: { name: 'PROPIEDAD', desc: 'Compra para dominar un color, o paga alquiler. Con monopolio, el alquiler se duplica.' },
-      railroad: { name: 'ESTACIÓN', desc: 'Transporte espacial. El alquiler se duplica con cada estación extra.' },
-      utility: { name: 'SERVICIO', desc: 'Recursos cósmicos. Alquiler = (dados × 4) o (dados × 10) si tienes ambos.' },
-      tax: { name: 'IMPUESTO', desc: 'Pagas al banco. Tu dinero va al Jackpot Galáctico.' },
-      jail: { name: 'CÁRCEL/VISITA', desc: 'Estancia obligatoria 3 turnos. O paga $50 para salir, o saca dobles.' },
-      freeparking: { name: 'JACKPOT', desc: '¡Fortune! Cobra TODO lo acumulado en impuestos y casillas de caos.' },
-      chance: { name: 'PODER DEL CAOS', desc: 'Efecto aleatorio benéfico: movimiento, dinero, o cartas mágicas.' },
-      chest: { name: 'CAJA DEL CAOS', desc: 'Efecto aleatorio EXTREMO: puede arruinarte o salvarte. ¡El caos reina!' },
-      gotojail: { name: 'TELETRANSPORTADOR', desc: 'Te envía directo a la CÁRCEL. Sin cobrar $200. Atajo oscuro.' },
-    },
-    en: {
-      go: { name: 'GO', desc: 'Collect $200 when you pass. The start of your galactic journey.' },
-      property: { name: 'PROPERTY', desc: 'Buy to corner a color or pay rent. With monopoly, rent doubles.' },
-      railroad: { name: 'STATION', desc: 'Space transport. Rent doubles with each extra station.' },
-      utility: { name: 'UTILITY', desc: 'Cosmic resources. Rent = (dice × 4) or (dice × 10) if you have both.' },
-      tax: { name: 'TAX', desc: 'You pay the bank. Your money goes to the Galactic Jackpot.' },
-      jail: { name: 'JAIL/VISIT', desc: 'Mandatory 3-turn stay. Or pay $50 to leave, or roll doubles.' },
-      freeparking: { name: 'JACKPOT', desc: 'Fortune! Collect ALL accumulated wealth from taxes and chaos squares.' },
-      chance: { name: 'POWER OF CHAOS', desc: 'Random beneficial effect: movement, money, or magical cards.' },
-      chest: { name: 'CHAOS BOX', desc: 'Extreme random effect: can bankrupt or save you. Chaos reigns!' },
-      gotojail: { name: 'TELEPORTER', desc: 'Sends you straight to JAIL. Without collecting $200. Dark shortcut.' },
-    }
-  };
-
-  // texto de reglas que se muestra antes de arrancar el juego
-  const RULES_TEXT = [
-    "Cada jugador comienza con $1500.",
-    "El tablero tiene 40 casillas: propiedades, estaciones, servicios, impuestos y cartas de caos/poder.",
-    "Al pasar por SALIDA cobras $200.",
-    "Si caes en una propiedad sin dueño puedes comprarla; de lo contrario pagas alquiler.",
-    "Alquileres se duplican si el propietario tiene el monopolio del color.",
-    "Llegar a 0 dinero te convierte en fantasma: no puedes comprar pero puedes seguir cobrando de otros.",
-    "Las cartas de CAOS y PODER provocan efectos especiales (vean la pantalla de juego para más detalles).",
-    "El dado caótico (probabilidad 30%) puede activar un tercer dado especial.",
-    "La primera persona con dinero al final elimina a los demás y gana el juego."
-  ];
 
   const addLog = useCallback((msg, type = 'normal') => {
     setLog(prev => [{ msg, type, id: Date.now() + Math.random() }, ...prev].slice(0, 30));
@@ -1105,7 +990,7 @@ export default function Raulopoly() {
   }
 
   const getSquareInfo = (squareType) => {
-    return SQUARE_INFO[language][squareType] || { name: 'Unknown', desc: 'Unknown square' };
+    return squareInfo[squareType] || t('unknownSquare', { returnObjects: true });
   };
 
   function renderCenter() {
@@ -1230,9 +1115,9 @@ export default function Raulopoly() {
                   transition: 'width 0.3s, background 0.3s',
                 }}></div>
               </div>
-              <div style={{ fontSize: 8, color: '#8899aa', marginBottom: 6 }}>{t.turnTime} {turnTimer}s</div>
+              <div style={{ fontSize: 8, color: '#8899aa', marginBottom: 6 }}>{t('turnTime')} {turnTimer}s</div>
               <button onClick={doRoll} style={btnStyle('#44aaff')}>
-                🎲 {t.play} DADOS!
+                🎲 {t('rollDice')}
               </button>
             </div>
           )}
@@ -1398,15 +1283,15 @@ export default function Raulopoly() {
         }}>
           <div style={{ fontSize: 48, fontWeight: 900, marginBottom: 20 }}>🔍</div>
           <div style={{ fontSize: 32, fontWeight: 900, color: '#44aaff', marginBottom: 12, letterSpacing: 2 }}>
-            {t.tutorialIntro}
+            {t('tutorialIntro')}
           </div>
           <div style={{ fontSize: 14, color: '#8899aa', marginBottom: 30, lineHeight: 1.6 }}>
-            {t.tutorialDesc}
+            {t('tutorialDesc')}
           </div>
           
           {/* Features List */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 30 }}>
-            {t.features.map((feature, i) => (
+            {features.map((feature, i) => (
               <div key={i} style={{
                 background: '#0a1520',
                 border: '1px solid #1a2a3a',
@@ -1430,13 +1315,13 @@ export default function Raulopoly() {
               setShowTutorial(false);
               setScreen('rules');
             }} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '10px 30px', width: 'auto' }}>
-              {t.startGame}
+              {t('startGame')}
             </button>
             <button onClick={() => {
               localStorage.setItem('raulopolyTutorialSeen', 'true');
               setShowTutorial(false);
             }} style={{ ...btnStyle('#666'), fontSize: 12, padding: '8px 20px', width: 'auto' }}>
-              {t.skipTutorial}
+              {t('skipTutorial')}
             </button>
           </div>
         </div>
@@ -1499,13 +1384,13 @@ export default function Raulopoly() {
           textShadow: 'none',
           animation: 'pulse 2s infinite',
         }}>
-          {t.title}
+          {t('title')}
         </div>
         <div style={{ color: '#8899aa', fontSize: 13, letterSpacing: 3 }}>
-          {t.subtitle}
+          {t('subtitle')}
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 600, fontSize: 11, color: '#667788' }}>
-          {t.features.map(feature => (
+          {features.map(feature => (
             <div key={feature.title} style={{ background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: '8px 12px', width: 160, textAlign: 'center' }}>
               <div style={{ fontSize: 14 }}>{feature.title}</div>
               <div style={{ fontSize: 9, marginTop: 3, color: '#556677' }}>{feature.desc}</div>
@@ -1518,15 +1403,15 @@ export default function Raulopoly() {
               ⏳ REANUDAR ÚTIMA PARTIDA
             </button>
             <button onClick={() => { localStorage.removeItem('raulopolyGame'); setHasSavedGame(false); }} style={{ ...btnStyle('#aa4444'), fontSize: 12, padding: '6px 12px' }}>
-              {t.delete}
+              {t('delete')}
             </button>
           </div>
         )}
         <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#44aaff'), fontSize: 16, padding: '10px 30px' }}>
-          🚀 {t.play}
+          🚀 {t('play')}
         </button>
         <button onClick={() => setShowTutorial(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
-          {t.tutorial}
+          {t('tutorial')}
         </button>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }`}</style>
       </div>
@@ -1547,18 +1432,18 @@ export default function Raulopoly() {
         color: '#fff'
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
-        <div style={{ fontSize: 36, fontWeight: 900 }}>{t.rules}</div>
+        <div style={{ fontSize: 36, fontWeight: 900 }}>{t('rules')}</div>
         <div style={{ maxWidth: 600, textAlign: 'left', fontSize: 14 }}>
           <ul style={{ paddingLeft: 20 }}>
-            {RULES_TEXT.map((r, i) => <li key={i} style={{ marginBottom: 6 }}>{r}</li>)}
+            {rulesText.map((r, i) => <li key={i} style={{ marginBottom: 6 }}>{r}</li>)}
           </ul>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <button onClick={() => setScreen('setup')} style={{ ...btnStyle('#44aaff'), fontSize: 14, padding: '8px 24px' }}>
-            {t.understood}
+            {t('understood')}
           </button>
           <button onClick={() => setScreen('menu')} style={{ ...btnStyle('#aa4444'), fontSize: 14, padding: '8px 24px' }}>
-            {t.back}
+            {t('back')}
           </button>
         </div>
       </div>
@@ -1581,12 +1466,12 @@ export default function Raulopoly() {
         padding: '20px',
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
-        <div style={{ fontSize: 28, fontWeight: 900, color: '#44aaff', letterSpacing: 4 }}>{t.config}</div>
-        <div style={{ fontSize: 12, color: '#8899aa' }}>{t.customize}</div>
+        <div style={{ fontSize: 28, fontWeight: 900, color: '#44aaff', letterSpacing: 4 }}>{t('config')}</div>
+        <div style={{ fontSize: 12, color: '#8899aa' }}>{t('customize')}</div>
         
         {/* Selección de jugadores */}
         <div style={{ width: 400, background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: 12 }}>
-          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t.players}</div>
+          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t('players')}</div>
           <div style={{ display: 'flex', gap: 10 }}>
             {[2, 3, 4].map(n => (
               <button key={n} onClick={() => setNumPlayers(n)} style={{
@@ -1601,7 +1486,7 @@ export default function Raulopoly() {
         
         {/* Nombres de jugadores */}
         <div style={{ width: 400, background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: 12 }}>
-          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t.names}</div>
+          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t('names')}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {Array.from({ length: numPlayers }, (_, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1630,7 +1515,7 @@ export default function Raulopoly() {
         
         {/* Botón para mostrar/ocultar configuración avanzada */}
         <button onClick={() => setShowAdvancedSettings(!showAdvancedSettings)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '6px 16px' }}>
-          {showAdvancedSettings ? '⌄' : '⌃'} {t.advancedSettings}
+          {showAdvancedSettings ? '⌄' : '⌃'} {t('advancedSettings')}
         </button>
         
         {/* Configuración avanzada */}
@@ -1640,7 +1525,7 @@ export default function Raulopoly() {
             
             {/* Dinero inicial */}
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t.initialMoney}: ${initialMoney}</div>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t('initialMoney')}: ${initialMoney}</div>
               <input 
                 type="range" 
                 min="500" 
@@ -1654,7 +1539,7 @@ export default function Raulopoly() {
             
             {/* Multiplicador de alquiler */}
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t.rentMultiplier}: x{rentMultiplier.toFixed(1)}</div>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t('rentMultiplier')}: x{rentMultiplier.toFixed(1)}</div>
               <input 
                 type="range" 
                 min="0.5" 
@@ -1668,7 +1553,7 @@ export default function Raulopoly() {
             
             {/* Probabilidad de Caos */}
             <div style={{ marginBottom: 6 }}>
-              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t.chaosChance}: {(chaosChance*100).toFixed(0)}%</div>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t('chaosChance')}: {(chaosChance*100).toFixed(0)}%</div>
               <input 
                 type="range" 
                 min="0" 
@@ -1685,10 +1570,10 @@ export default function Raulopoly() {
         {/* Botones de acción */}
         <div style={{ display: 'flex', gap: 12 }}>
           <button onClick={startGame} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '8px 24px' }}>
-            🚀 {t.start}
+            🚀 {t('start')}
           </button>
           <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#aa4444'), fontSize: 14, padding: '8px 24px' }}>
-            {t.back}
+            {t('back')}
           </button>
         </div>
       </div>
@@ -1730,9 +1615,9 @@ export default function Raulopoly() {
             fontFamily: '"Orbitron", sans-serif',
             color: '#fff',
           }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: '#44aaff' }}>{t.helpTitle}</div>
+            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: '#44aaff' }}>{t('helpTitle')}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 11 }}>
-              {Object.entries(SQUARE_INFO[language]).map(([key, info]) => (
+              {Object.entries(squareInfo).map(([key, info]) => (
                 <div key={key} style={{ background: '#0a2030', border: '1px solid #1a3a4a', borderRadius: 4, padding: 8 }}>
                   <div style={{ color: '#44ff88', fontWeight: 700, marginBottom: 4 }}>{info.name}</div>
                   <div style={{ color: '#8899aa', fontSize: 9, lineHeight: 1.3 }}>{info.desc}</div>
@@ -1740,7 +1625,7 @@ export default function Raulopoly() {
               ))}
             </div>
             <button onClick={() => setShowHelp(false)} style={{ ...btnStyle('#44aaff'), marginTop: 12, width: '100%' }}>
-              {t.close}
+              {t('close')}
             </button>
           </div>
         </div>
@@ -1748,7 +1633,7 @@ export default function Raulopoly() {
       {/* Top-right controls */}
       <div style={{ position: 'fixed', top: 10, right: 10, display: 'flex', gap: 8, zIndex: 100 }}>
         <button onClick={() => setShowHelp(!showHelp)} style={{ ...btnStyle('#ffaa00'), fontSize: 14 }}>
-          {t.help}
+          {t('help')}
         </button>
         <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 11 }}>ES</button>
         <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 11 }}>EN</button>
@@ -1780,7 +1665,7 @@ export default function Raulopoly() {
         gap: 4,
       }}>
         <div style={{ fontFamily: '"Orbitron", sans-serif', fontSize: 10, color: '#44aaff', marginBottom: 4 }}>
-          MAPA DE PROPIEDADES
+          {t('propertyMap')}
         </div>
         {Object.entries(GROUP_SQUARES).map(([group, ids]) => (
           <div key={group} style={{
@@ -1823,7 +1708,7 @@ export default function Raulopoly() {
         <div style={{
           background: '#0a1520', border: '1px solid #334455', borderRadius: 4, padding: '4px 6px',
         }}>
-          <div style={{ fontSize: 8, color: '#888', fontFamily: '"Orbitron", sans-serif', marginBottom: 2 }}>OTRAS</div>
+          <div style={{ fontSize: 8, color: '#888', fontFamily: '"Orbitron", sans-serif', marginBottom: 2 }}>{t('otherProperties')}</div>
           {[...RAILROADS, ...UTILITIES].map(id => {
             const owner = propOwners[id];
             const sq = SQUARE_DATA[id];
@@ -1836,9 +1721,9 @@ export default function Raulopoly() {
             );
           })}
         </div>
-        <button onClick={() => { if (window.confirm('¿Abandonar la partida?')) setScreen('menu'); }}
+        <button onClick={() => { if (window.confirm(t('exitConfirmation'))) setScreen('menu'); }}
           style={{ ...btnStyle('#333', true), marginTop: 8, width: '100%' }}>
-          🚪 Salir
+          {t('exit')}
         </button>
       </div>
     </div>

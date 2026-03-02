@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "../i18n/I18nProvider";
 
 // ========================= GAME DATA =========================
 
@@ -78,36 +79,36 @@ const PLAYER_CONFIGS = [
 ];
 
 const CHAOS_CARDS = [
-  { id: 'allLoseHalf',     emoji: '🌪️', title: '¡TORMENTA GALÁCTICA!',     text: 'TODOS los jugadores pierden la MITAD de su dinero. Ni el banco se salva.' },
-  { id: 'swapWithRichest', emoji: '🔀', title: '¡INVERSIÓN CUÁNTICA!',      text: 'Intercambias POSICIÓN EN EL TABLERO con el jugador más rico. ¡Surpresa!' },
-  { id: 'destroyHouses',   emoji: '☄️', title: '¡METEORITO DESTRUCTOR!',    text: 'Un meteorito destruye TODAS las casas de un grupo de color aleatorio.' },
-  { id: 'gain500',         emoji: '🤑', title: '¡LOTERÍA MUTANTE!',         text: '¡El banco te entrega $500! (Sospechosamente sin explicación.)' },
-  { id: 'leftLose300',     emoji: '😈', title: '¡MALDICIÓN VIRAL!',         text: 'El jugador a tu IZQUIERDA pierde $300 por "contaminación kármica".' },
-  { id: 'goMostExpensive', emoji: '🕳️', title: '¡AGUJERO NEGRO!',          text: 'Eres succionado hasta la PROPIEDAD MÁS CARA del tablero. Buena suerte.' },
-  { id: 'doubleRent',      emoji: '🔥', title: '¡REVOLUCIÓN PROLETARIA!',   text: 'TODOS los alquileres se DUPLICAN durante los próximos 2 turnos.' },
-  { id: 'steal200each',    emoji: '🦹', title: '¡ROBO CUÁNTICO!',           text: 'Robas $200 de CADA jugador. Solo los fanáticos del caos se alegran.' },
-  { id: 'nextDiceX3',      emoji: '🎲', title: '¡MUTACIÓN GENÉTICA!',       text: 'Tu PRÓXIMO dado se multiplica por 3. Prepárate para volar.' },
-  { id: 'randomTeleport',  emoji: '🌀', title: '¡TELETRANSPORTE FORZADO!',  text: 'Eres enviado a una casilla COMPLETAMENTE ALEATORIA del tablero.' },
-  { id: 'collect100each',  emoji: '✨', title: '¡CARISMA GALÁCTICO!',       text: 'Cobras $100 de CADA jugador gracias a tu aura magnética.' },
-  { id: 'payPerProp',      emoji: '💸', title: '¡IMPUESTO KÁRMICO!',        text: 'Pagas $50 por CADA PROPIEDAD que posees. El karma es un boomerang.' },
-  { id: 'nextTurnFree',    emoji: '🛡️', title: '¡ESCUDO DIMENSIONAL!',     text: 'Tu próximo turno eres INMUNE a alquileres. Disfruta mientras dura.' },
-  { id: 'bankCharge400',   emoji: '🏦', title: '¡CRISIS ECONÓMICA!',        text: 'El banco te cobra $400 en "cuotas de rescate dimensional". Lo sentimos.' },
-  { id: 'backToStart',     emoji: '👻', title: '¡BUCLE TEMPORAL!',          text: 'Retrocedes hasta la SALIDA sin cobrar $200. El tiempo se ha roto.' },
-  { id: 'ghostSteal',      emoji: '🫀', title: '¡POSESIÓN ESPIRITUAL!',     text: 'Robas UNA PROPIEDAD aleatoria de cualquier jugador. (Elige tú a cuál.)' },
-  { id: 'jackpotBonus',    emoji: '🎰', title: '¡BONUS DEL JACKPOT!',       text: 'El Jackpot Galáctico se DUPLICA instantáneamente. El caos es generoso.' },
+  { id: 'allLoseHalf', emoji: '🌪️' },
+  { id: 'swapWithRichest', emoji: '🔀' },
+  { id: 'destroyHouses', emoji: '☄️' },
+  { id: 'gain500', emoji: '🤑' },
+  { id: 'leftLose300', emoji: '😈' },
+  { id: 'goMostExpensive', emoji: '🕳️' },
+  { id: 'doubleRent', emoji: '🔥' },
+  { id: 'steal200each', emoji: '🦹' },
+  { id: 'nextDiceX3', emoji: '🎲' },
+  { id: 'randomTeleport', emoji: '🌀' },
+  { id: 'collect100each', emoji: '✨' },
+  { id: 'payPerProp', emoji: '💸' },
+  { id: 'nextTurnFree', emoji: '🛡️' },
+  { id: 'bankCharge400', emoji: '🏦' },
+  { id: 'backToStart', emoji: '👻' },
+  { id: 'ghostSteal', emoji: '🫀' },
+  { id: 'jackpotBonus', emoji: '🎰' },
 ];
 
 const POWER_CARDS = [
-  { id: 'goToGo',       emoji: '🚀', text: 'Avanza hasta la SALIDA. Cobra $200.' },
-  { id: 'goTo5',        emoji: '🛸', text: 'Avanza a la Estación Orbital Norte.' },
-  { id: 'nextBackward', emoji: '🔄', text: '¡DADO MALDITO! Tu próximo movimiento es en REVERSA.' },
-  { id: 'goToJail',     emoji: '⛓️', text: 'Ve directamente a la CÁRCEL. No cobres $200.' },
-  { id: 'collect150',   emoji: '💰', text: 'Cobra $150 de todos los jugadores ("consultoría de emergencia").' },
-  { id: 'pay200',       emoji: '💸', text: '¡TERREMOTO FISCAL! Paga $200 al banco.' },
-  { id: 'outOfJail',    emoji: '🗝️', text: 'Sales gratis de la cárcel. (Guarda esta carta.)' },
-  { id: 'gain100',      emoji: '🎁', text: '¡Bonus de productividad cósmica! Cobra $100.' },
-  { id: 'back3',        emoji: '⏮️', text: 'Retrocede 3 casillas.' },
-  { id: 'nearest',      emoji: '🧲', text: 'Avanza a la propiedad SIN DUEÑO más cercana.' },
+  { id: 'goToGo', emoji: '🚀' },
+  { id: 'goTo5', emoji: '🛸' },
+  { id: 'nextBackward', emoji: '🔄' },
+  { id: 'goToJail', emoji: '⛓️' },
+  { id: 'collect150', emoji: '💰' },
+  { id: 'pay200', emoji: '💸' },
+  { id: 'outOfJail', emoji: '🗝️' },
+  { id: 'gain100', emoji: '🎁' },
+  { id: 'back3', emoji: '⏮️' },
+  { id: 'nearest', emoji: '🧲' },
 ];
 
 // ========================= HELPERS =========================
@@ -158,6 +159,7 @@ function createPlayers(num) {
 // ========================= MAIN COMPONENT =========================
 
 export default function Raulopoly() {
+  const { language, setLanguage, t } = useTranslation();
   // pantalla actual: menu, rules, game, winner
   const [screen, setScreen]             = useState('menu');
   const [numPlayers, setNumPlayers]     = useState(2);
@@ -182,7 +184,13 @@ export default function Raulopoly() {
   const [initialMoney, setInitialMoney]      = useState(1500);
   const [rentMultiplier, setRentMultiplier]  = useState(1);
   const [chaosChance, setChaoschance]        = useState(0.30);
-  const [hasSavedGame, setHasSavedGame]      = useState(!!localStorage.getItem('raulopolyGame'));
+  const [hasSavedGame, setHasSavedGame]      = useState(() => {
+    try {
+      return !!localStorage.getItem('raulopolyGame');
+    } catch (_) {
+      return false;
+    }
+  });
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
   // Función para guardar partida en localStorage
@@ -193,12 +201,21 @@ export default function Raulopoly() {
       pendingBuy, pendingRent, winner, playerNames,
       settings: { initialMoney, rentMultiplier, chaosChance }
     };
-    localStorage.setItem('raulopolyGame', JSON.stringify(gameState));
+    try {
+      localStorage.setItem('raulopolyGame', JSON.stringify(gameState));
+    } catch (_) {
+      // noop: storage unavailable
+    }
   }, [screen, numPlayers, players, currentIdx, phase, dice, chaosDie, propOwners, propHouses, log, jackpot, activeCard, doubleRentTurns, pendingBuy, pendingRent, winner, playerNames, initialMoney, rentMultiplier, chaosChance]);
 
   // Función para cargar partida desde localStorage
   const loadGame = useCallback(() => {
-    const saved = localStorage.getItem('raulopolyGame');
+    let saved = null;
+    try {
+      saved = localStorage.getItem('raulopolyGame');
+    } catch (_) {
+      saved = null;
+    }
     if (saved) {
       try {
         const gameState = JSON.parse(saved);
@@ -278,10 +295,9 @@ export default function Raulopoly() {
     }
   }, []);
 
-  const [language, setLanguage] = useState('es'); // 'es' o 'en'
   const [turnTimer, setTurnTimer] = useState(60);
   const [showHelp, setShowHelp] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(() => {
+  const [tutorialVisible, setTutorialVisible] = useState(() => {
     try {
       const seen = localStorage.getItem('raulopolyTutorialSeen');
       return !seen; // Mostrar solo si no ha sido visto
@@ -290,85 +306,10 @@ export default function Raulopoly() {
     }
   });
 
-  // Objeto de traducciones
-  const TRANSLATIONS = {
-    es: {
-      title: 'RAULOPOLY',
-      subtitle: 'EL MONOPOLY DEL CAOS GALÁCTICO',
-      play: 'JUGAR',
-      rules: 'Reglas del juego',
-      understood: '¡Entendido, vamos!',
-      cancel: 'Cancelar',
-      config: 'CONFIGURACIÓN',
-      customize: 'Personaliza tu partida',
-      players: 'Número de jugadores',
-      names: 'Nombres',
-      advancedSettings: 'Configuración Avanzada',
-      initialMoney: 'Dinero inicial',
-      rentMultiplier: 'Multiplicador de alquiler',
-      chaosChance: 'Probabilidad Dado del Caos',
-      start: '¡COMENZAR!',
-      back: 'Atrás',
-      resume: '⏳ REANUDAR ÚLTIMA PARTIDA',
-      delete: 'Borrar',
-      help: '?',
-      turnTime: 'Tiempo restante:',
-      helpTitle: 'Ayuda - Tipos de Casilla',
-      close: 'Cerrar',
-      tutorial: 'Tutorial Interactivo',
-      tutorialIntro: '¡Bienvenido a RAULOPOLY!',
-      tutorialDesc: 'Tu objetivo es convertirte en el jugador más rico mientras navegas un tablero galáctico caótico. ¡Compra propiedades, cobra alquiler y sobrevive el caos!',
-      features: [
-        { title: '🎲 Dado del Caos', desc: '30% de efectos salvajes en cada turno' },
-        { title: '👻 Modo Fantasma', desc: 'Los arruinados se convierten en espectros vengativos' },
-        { title: '🎰 Jackpot Galáctico', desc: 'El parking libre acumula dinero REAL' },
-        { title: '☄️ Meteoritos', desc: 'Las casas pueden ser destruidas en cualquier momento' },
-        { title: '🔀 Teletransportadores', desc: 'El tablero te mueve a donde no quieres' },
-        { title: '🦹 Robo Cuántico', desc: 'Puedes robar dinero y propiedades a otros' },
-      ],
-      startGame: 'Comenzar Juego',
-      skipTutorial: 'Saltar Tutorial',
-    },
-    en: {
-      title: 'RAULOPOLY',
-      subtitle: 'THE GALACTIC CHAOS MONOPOLY',
-      play: 'PLAY',
-      rules: 'Game Rules',
-      understood: 'Got it, let\'s play!',
-      cancel: 'Cancel',
-      config: 'CONFIGURATION',
-      customize: 'Customize your game',
-      players: 'Number of players',
-      names: 'Names',
-      advancedSettings: 'Advanced Settings',
-      initialMoney: 'Initial money',
-      rentMultiplier: 'Rent multiplier',
-      chaosChance: 'Chaos Die probability',
-      start: 'START!',
-      back: 'Back',
-      resume: '⏳ RESUME LAST GAME',
-      delete: 'Delete',
-      help: '?',
-      turnTime: 'Time left:',
-      helpTitle: 'Help - Square Types',
-      close: 'Close',
-      tutorial: 'Interactive Tutorial',
-      tutorialIntro: 'Welcome to RAULOPOLY!',
-      tutorialDesc: 'Your goal is to become the richest player while navigating a chaotic galactic board. Buy properties, collect rent, and survive the chaos!',
-      features: [
-        { title: '🎲 Chaos Die', desc: '30% wild effects each turn' },
-        { title: '👻 Ghost Mode', desc: 'Bankrupt players become vengeful specters' },
-        { title: '🎰 Galactic Jackpot', desc: 'Free parking accumulates REAL money' },
-        { title: '☄️ Meteorites', desc: 'Houses can be destroyed anytime' },
-        { title: '🔀 Teleporters', desc: 'The board moves you where you don\'t want' },
-        { title: '🦹 Quantum Theft', desc: 'You can steal money and properties from others' },
-      ],
-      startGame: 'Start Game',
-      skipTutorial: 'Skip Tutorial',
-    }
-  };
-
-  const t = TRANSLATIONS[language];
+  const features = t('features', { returnObjects: true }) || [];
+  const squareInfo = t('squareInfo', { returnObjects: true }) || {};
+  const rulesText = t('rulesText', { returnObjects: true }) || [];
+  const getCardI18nPrefix = (card) => card?.source === 'chest' ? 'chaosCards' : 'powerCards';
 
   // Timer effect - reduce 1 segundo cada segundo durante el juego
   useEffect(() => {
@@ -393,48 +334,12 @@ export default function Raulopoly() {
     setTurnTimer(60);
   }, [currentIdx]);
 
-  const SQUARE_INFO = {
-    es: {
-      go: { name: 'SALIDA', desc: 'Cobra $200 al pasar. El inicio del viaje galáctico.' },
-      property: { name: 'PROPIEDAD', desc: 'Compra para dominar un color, o paga alquiler. Con monopolio, el alquiler se duplica.' },
-      railroad: { name: 'ESTACIÓN', desc: 'Transporte espacial. El alquiler se duplica con cada estación extra.' },
-      utility: { name: 'SERVICIO', desc: 'Recursos cósmicos. Alquiler = (dados × 4) o (dados × 10) si tienes ambos.' },
-      tax: { name: 'IMPUESTO', desc: 'Pagas al banco. Tu dinero va al Jackpot Galáctico.' },
-      jail: { name: 'CÁRCEL/VISITA', desc: 'Estancia obligatoria 3 turnos. O paga $50 para salir, o saca dobles.' },
-      freeparking: { name: 'JACKPOT', desc: '¡Fortune! Cobra TODO lo acumulado en impuestos y casillas de caos.' },
-      chance: { name: 'PODER DEL CAOS', desc: 'Efecto aleatorio benéfico: movimiento, dinero, o cartas mágicas.' },
-      chest: { name: 'CAJA DEL CAOS', desc: 'Efecto aleatorio EXTREMO: puede arruinarte o salvarte. ¡El caos reina!' },
-      gotojail: { name: 'TELETRANSPORTADOR', desc: 'Te envía directo a la CÁRCEL. Sin cobrar $200. Atajo oscuro.' },
-    },
-    en: {
-      go: { name: 'GO', desc: 'Collect $200 when you pass. The start of your galactic journey.' },
-      property: { name: 'PROPERTY', desc: 'Buy to corner a color or pay rent. With monopoly, rent doubles.' },
-      railroad: { name: 'STATION', desc: 'Space transport. Rent doubles with each extra station.' },
-      utility: { name: 'UTILITY', desc: 'Cosmic resources. Rent = (dice × 4) or (dice × 10) if you have both.' },
-      tax: { name: 'TAX', desc: 'You pay the bank. Your money goes to the Galactic Jackpot.' },
-      jail: { name: 'JAIL/VISIT', desc: 'Mandatory 3-turn stay. Or pay $50 to leave, or roll doubles.' },
-      freeparking: { name: 'JACKPOT', desc: 'Fortune! Collect ALL accumulated wealth from taxes and chaos squares.' },
-      chance: { name: 'POWER OF CHAOS', desc: 'Random beneficial effect: movement, money, or magical cards.' },
-      chest: { name: 'CHAOS BOX', desc: 'Extreme random effect: can bankrupt or save you. Chaos reigns!' },
-      gotojail: { name: 'TELEPORTER', desc: 'Sends you straight to JAIL. Without collecting $200. Dark shortcut.' },
+  const addLog = useCallback((keyOrMessage, params = {}, type = 'normal') => {
+    if (typeof params === 'string') {
+      setLog(prev => [{ message: keyOrMessage, type: params, id: Date.now() + Math.random() }, ...prev].slice(0, 30));
+      return;
     }
-  };
-
-  // texto de reglas que se muestra antes de arrancar el juego
-  const RULES_TEXT = [
-    "Cada jugador comienza con $1500.",
-    "El tablero tiene 40 casillas: propiedades, estaciones, servicios, impuestos y cartas de caos/poder.",
-    "Al pasar por SALIDA cobras $200.",
-    "Si caes en una propiedad sin dueño puedes comprarla; de lo contrario pagas alquiler.",
-    "Alquileres se duplican si el propietario tiene el monopolio del color.",
-    "Llegar a 0 dinero te convierte en fantasma: no puedes comprar pero puedes seguir cobrando de otros.",
-    "Las cartas de CAOS y PODER provocan efectos especiales (vean la pantalla de juego para más detalles).",
-    "El dado caótico (probabilidad 30%) puede activar un tercer dado especial.",
-    "La primera persona con dinero al final elimina a los demás y gana el juego."
-  ];
-
-  const addLog = useCallback((msg, type = 'normal') => {
-    setLog(prev => [{ msg, type, id: Date.now() + Math.random() }, ...prev].slice(0, 30));
+    setLog(prev => [{ key: keyOrMessage, params, type, id: Date.now() + Math.random() }, ...prev].slice(0, 30));
   }, []);
 
   function startGame() {
@@ -457,7 +362,7 @@ export default function Raulopoly() {
     setDoubleRentTurns(0);
     setScreen('game');
     playSound('success');
-    addLog('¡RAULOPOLY HA COMENZADO! 🚀 ¡Que el caos os acompañe!', 'event');
+    addLog('events.gameStarted', {}, 'event');
   }
 
   function hasMonopoly(playerIdx, group) {
@@ -498,13 +403,17 @@ export default function Raulopoly() {
       } else if (toIdx >= 0) {
         next[toIdx].money += actual;
       }
-      addLog(reason || `${next[fromIdx].name} paga $${actual}`, 'money');
+      const transferKey = typeof reason === 'string' ? reason : 'events.transferToBank';
+      const transferParams = typeof reason === 'object' && reason !== null
+        ? reason
+        : { player: next[fromIdx].name, amount: actual };
+      addLog(transferKey, transferParams, 'money');
       // check bankruptcy
       if (next[fromIdx].money <= 0 && !next[fromIdx].isGhost) {
         next[fromIdx].money = 0;
         next[fromIdx].alive = false;
         next[fromIdx].isGhost = true;
-        addLog(`💀 ${next[fromIdx].name} está en BANCARROTA y se convierte en ¡FANTASMA VENGADOR! 👻`, 'event');
+        addLog('events.bankruptGhost', { player: next[fromIdx].name }, 'event');
         // ghost can still haunt players
       }
       return next;
@@ -537,17 +446,17 @@ export default function Raulopoly() {
   function landOnSquare(playerIdx, squareId, diceTotal, newPlayers) {
     const sq = SQUARE_DATA[squareId];
     const player = newPlayers[playerIdx];
-    addLog(`${player.emoji} ${player.name} cae en: ${sq.name}`, 'move');
+    addLog('events.landedOnSquare', { emoji: player.emoji, player: player.name, square: sq.name }, 'move');
 
     if (sq.type === 'go') {
-      addLog(`🚀 ¡${player.name} pasa por la SALIDA! Cobra $200`, 'money');
+      addLog('events.passGoCollect', { player: player.name, amount: 200 }, 'money');
       setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, money: p.money + 200 } : p));
       setPhase('endturn');
       return;
     }
 
     if (sq.type === 'gotojail') {
-      addLog(`🌀 ¡TELETRANSPORTE a la CÁRCEL! ${player.name} desaparece de la existencia momentáneamente...`, 'event');
+      addLog('events.teleportToJail', { player: player.name }, 'event');
       playSound('jail');
       setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, position: 10, inJail: true, jailTurns: 0 } : p));
       setPhase('endturn');
@@ -556,7 +465,7 @@ export default function Raulopoly() {
 
     if (sq.type === 'jail' || sq.type === 'freeparking') {
       if (sq.type === 'freeparking') {
-        addLog(`🎰 ¡${player.name} cae en el JACKPOT GALÁCTICO! Cobra $${jackpot}!`, 'event');
+        addLog('events.jackpotCollect', { player: player.name, amount: jackpot }, 'event');
         setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, money: p.money + jackpot } : p));
         setJackpot(500); // reset
       }
@@ -566,7 +475,7 @@ export default function Raulopoly() {
 
     if (sq.type === 'tax') {
       const amount = sq.amount;
-      addLog(`💸 ${player.name} paga $${amount} de impuestos al Jackpot Galáctico.`, 'money');
+      addLog('events.payTaxToJackpot', { player: player.name, amount }, 'money');
       setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, money: Math.max(0, p.money - amount) } : p));
       setJackpot(jp => jp + amount);
       setPhase('endturn');
@@ -597,11 +506,11 @@ export default function Raulopoly() {
           setPendingBuy({ squareId, price: sq.price });
           setPhase('buydecision');
         } else {
-          addLog(`😢 ${player.name} no puede comprar ${sq.name} (le faltan fondos galácticos).`, 'normal');
+          addLog('events.cannotBuy', { player: player.name, square: sq.name }, 'normal');
           setPhase('endturn');
         }
       } else if (owner === playerIdx) {
-        addLog(`🏠 ${player.name} está en su propia propiedad. ¡Al menos alguien lo visita!`, 'normal');
+        addLog('events.ownProperty', { player: player.name }, 'normal');
         setPhase('endturn');
       } else {
         const rent = calcRent(squareId, diceTotal, playerIdx);
@@ -610,7 +519,7 @@ export default function Raulopoly() {
           setPhase('payrent');
         } else {
           if (player.nextTurnFree) {
-            addLog(`🛡️ ¡${player.name} usa su ESCUDO DIMENSIONAL! Alquiler evitado.`, 'event');
+            addLog('events.shieldUsed', { player: player.name }, 'event');
             setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, nextTurnFree: false } : p));
           }
           setPhase('endturn');
@@ -639,7 +548,7 @@ export default function Raulopoly() {
     if (player.nextDiceX3) {
       d1 = Math.min(d1 * 3, 18);
       d2 = Math.min(d2 * 3, 18);
-      addLog(`🧬 ¡MUTACIÓN ACTIVA! Dados multiplicados x3!`, 'event');
+      addLog('events.mutationActive', {}, 'event');
     }
 
     setDice([d1, d2]);
@@ -653,15 +562,15 @@ export default function Raulopoly() {
 
     if (player.inJail) {
       if (d1 === d2) {
-        addLog(`🎲 ¡DOBLES! ${player.name} escapa de la cárcel.`, 'event');
+        addLog('events.jailEscapeDoubles', { player: player.name }, 'event');
         setPlayers(prev => prev.map((p, i) => i === currentIdx ? { ...p, inJail: false, jailTurns: 0 } : p));
       } else if (player.jailTurns >= 2) {
-        addLog(`⛓️ ${player.name} paga $50 para salir de la cárcel.`, 'money');
+        addLog('events.payJailFine', { player: player.name, amount: 50 }, 'money');
         setPlayers(prev => prev.map((p, i) =>
           i === currentIdx ? { ...p, money: Math.max(0, p.money - 50), inJail: false, jailTurns: 0 } : p
         ));
       } else {
-        addLog(`⛓️ ${player.name} sigue en la cárcel. (Turno ${player.jailTurns + 1}/3)`, 'normal');
+        addLog('events.stayInJail', { player: player.name, turn: player.jailTurns + 1 }, 'normal');
         setPlayers(prev => prev.map((p, i) =>
           i === currentIdx ? { ...p, jailTurns: p.jailTurns + 1 } : p
         ));
@@ -673,18 +582,18 @@ export default function Raulopoly() {
     let newPos;
     if (backward) {
       newPos = ((player.position - total) + 40) % 40;
-      addLog(`⏮️ ¡DADO MALDITO! ${player.name} retrocede ${total} casillas.`, 'event');
+      addLog('events.cursedDieBackwards', { player: player.name, steps: total }, 'event');
     } else {
       newPos = (player.position + total) % 40;
       if (newPos < player.position && !backward) {
-        addLog(`🚀 ${player.name} pasa por la SALIDA. ¡Cobra $200!`, 'money');
+        addLog('events.passGoCollect', { player: player.name, amount: 200 }, 'money');
         setPlayers(prev => prev.map((p, i) => i === currentIdx ? { ...p, money: p.money + 200 } : p));
       }
     }
 
     setPlayers(prev => {
       const next = prev.map((p, i) => i === currentIdx ? { ...p, position: newPos } : p);
-      addLog(`🎲 ${player.name} saca ${d1}+${d2}=${total}${backward ? ' (¡REVERSA!)' : ''}${chaosVal ? ` + Dado del Caos: ${chaosVal} 😱` : ''}`, 'dice');
+      addLog('events.rollResult', { player: player.name, d1, d2, total, backward: backward ? t('events.reverseTag') : '', chaos: chaosVal ? t('events.chaosTag', { chaosVal }) : '' }, 'dice');
 
       if (chaosVal) {
         // Chaos die effect based on value
@@ -700,16 +609,16 @@ export default function Raulopoly() {
     const p = currentPlayers[pidx];
     switch (val) {
       case 1:
-        addLog(`💣 ¡Dado del Caos [1]! ${p.name} pierde $150 adicionales.`, 'chaos');
+        addLog('events.chaosDieLose150', { player: p.name, amount: 150 }, 'chaos');
         setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: Math.max(0, pl.money - 150) } : pl));
         break;
       case 2:
-        addLog(`🎁 ¡Dado del Caos [2]! ${p.name} recibe $100 del banco galáctico.`, 'chaos');
+        addLog('events.chaosDieGain100', { player: p.name, amount: 100 }, 'chaos');
         setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: pl.money + 100 } : pl));
         break;
       case 3:
         const rp = (pidx + 1) % currentPlayers.length;
-        addLog(`🔀 ¡Dado del Caos [3]! ${p.name} INTERCAMBIA POSICIÓN con ${currentPlayers[rp].name}!`, 'chaos');
+        addLog('events.chaosDieSwap', { player: p.name, target: currentPlayers[rp].name }, 'chaos');
         setPlayers(prev => {
           const next = prev.map(pl => ({ ...pl }));
           const posA = next[pidx].position;
@@ -719,15 +628,15 @@ export default function Raulopoly() {
         });
         break;
       case 4:
-        addLog(`⏩ ¡Dado del Caos [4]! ${p.name} avanza 6 casillas extra.`, 'chaos');
+        addLog('events.chaosDieAdvance6', { player: p.name, steps: 6 }, 'chaos');
         setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: (pl.position + 6) % 40 } : pl));
         break;
       case 5:
-        addLog(`😇 ¡Dado del Caos [5]! ${p.name} es INMUNE al próximo alquiler.`, 'chaos');
+        addLog('events.chaosDieShield', { player: p.name }, 'chaos');
         setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, nextTurnFree: true } : pl));
         break;
       case 6:
-        addLog(`🌪️ ¡Dado del Caos [6]! ¡TORMENTA TOTAL! Todos pierden $100.`, 'chaos');
+        addLog('events.chaosDieStorm', { amount: 100 }, 'chaos');
         setPlayers(prev => prev.map(pl => ({ ...pl, money: Math.max(0, pl.money - 100) })));
         setJackpot(jp => jp + 100 * currentPlayers.length);
         break;
@@ -744,19 +653,19 @@ export default function Raulopoly() {
       switch (card.id) {
         case 'goToGo':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: 0, money: pl.money + 200 } : pl));
-          addLog(`🚀 ${p.name} avanza a la SALIDA y cobra $200.`, 'move');
+          addLog('events.cardAdvanceGo', { player: p.name, amount: 200 }, 'move');
           break;
         case 'goTo5':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: 5 } : pl));
-          addLog(`🛸 ${p.name} vuela a la Estación Norte.`, 'move');
+          addLog('events.cardGoNorthStation', { player: p.name }, 'move');
           break;
         case 'nextBackward':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, nextTurnBackward: true } : pl));
-          addLog(`🔄 ${p.name} recibirá el DADO MALDITO en su próximo turno.`, 'event');
+          addLog('events.cardNextBackward', { player: p.name }, 'event');
           break;
         case 'goToJail':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: 10, inJail: true, jailTurns: 0 } : pl));
-          addLog(`⛓️ ${p.name} va directamente a la CÁRCEL.`, 'event');
+          addLog('events.cardGoJail', { player: p.name }, 'event');
           break;
         case 'collect150':
           let total150 = 0;
@@ -770,26 +679,26 @@ export default function Raulopoly() {
               return pl;
             });
             next[pidx] = { ...next[pidx], money: next[pidx].money + total150 };
-            addLog(`💰 ${p.name} cobra $150 de cada jugador. Total: $${total150}`, 'money');
+            addLog('events.cardCollect150Each', { player: p.name, total: total150, amount: 150 }, 'money');
             return next;
           });
           break;
         case 'pay200':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: Math.max(0, pl.money - 200) } : pl));
           setJackpot(jp => jp + 200);
-          addLog(`💸 ${p.name} paga $200 al banco por "terremoto fiscal".`, 'money');
+          addLog('events.cardPay200', { player: p.name, amount: 200 }, 'money');
           break;
         case 'outOfJail':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, freeJailCards: pl.freeJailCards + 1 } : pl));
-          addLog(`🗝️ ${p.name} obtiene una carta "Salida Libre de la Cárcel".`, 'event');
+          addLog('events.cardOutOfJail', { player: p.name }, 'event');
           break;
         case 'gain100':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: pl.money + 100 } : pl));
-          addLog(`🎁 ${p.name} cobra $100 de bonus.`, 'money');
+          addLog('events.cardGain100', { player: p.name, amount: 100 }, 'money');
           break;
         case 'back3':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: ((pl.position - 3) + 40) % 40 } : pl));
-          addLog(`⏮️ ${p.name} retrocede 3 casillas.`, 'move');
+          addLog('events.cardBack3', { player: p.name, steps: 3 }, 'move');
           break;
         case 'nearest': {
           let pos = p.position;
@@ -798,7 +707,7 @@ export default function Raulopoly() {
             const sq = SQUARE_DATA[check];
             if ((sq.type === 'property' || sq.type === 'railroad' || sq.type === 'utility') && propOwners[check] === undefined) {
               setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: check } : pl));
-              addLog(`🧲 ${p.name} avanza a ${sq.name} (primera propiedad libre).`, 'move');
+              addLog('events.cardNearestProperty', { player: p.name, square: sq.name }, 'move');
               break;
             }
           }
@@ -810,7 +719,7 @@ export default function Raulopoly() {
       switch (card.id) {
         case 'allLoseHalf':
           setPlayers(prev => prev.map(pl => ({ ...pl, money: Math.floor(pl.money / 2) })));
-          addLog(`🌪️ ¡TORMENTA GALÁCTICA! Todos pierden la mitad de su dinero.`, 'chaos');
+          addLog('events.chaosCardAllLoseHalf', {}, 'chaos');
           break;
         case 'swapWithRichest': {
           const richest = [...players].filter((_, i) => i !== pidx).sort((a, b) => b.money - a.money)[0];
@@ -822,7 +731,7 @@ export default function Raulopoly() {
               next[richest.id].position = posA;
               return next;
             });
-            addLog(`🔀 ${p.name} intercambia posición con ${richest.name} (el más rico).`, 'chaos');
+            addLog('events.chaosCardSwapRichest', { player: p.name, target: richest.name }, 'chaos');
           }
           break;
         }
@@ -835,28 +744,28 @@ export default function Raulopoly() {
             ids.forEach(id => { delete next[id]; });
             return next;
           });
-          addLog(`☄️ ¡METEORITO! Todas las casas del grupo ${rndGroup} son DESTRUIDAS.`, 'chaos');
+          addLog('events.chaosCardDestroyHouses', { group: rndGroup }, 'chaos');
           break;
         }
         case 'gain500':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: pl.money + 500 } : pl));
-          addLog(`🤑 ${p.name} recibe $500 de la Lotería Mutante.`, 'money');
+          addLog('events.chaosCardGain500', { player: p.name, amount: 500 }, 'money');
           break;
         case 'leftLose300': {
           const left = (pidx - 1 + players.length) % players.length;
           setPlayers(prev => prev.map((pl, i) => i === left ? { ...pl, money: Math.max(0, pl.money - 300) } : pl));
-          addLog(`😈 ${players[left].name} pierde $300 por maldición viral.`, 'money');
+          addLog('events.chaosCardLeftLose300', { player: players[left].name, amount: 300 }, 'money');
           break;
         }
         case 'goMostExpensive': {
           const mostExp = SQUARE_DATA.filter(sq => sq.type === 'property').sort((a, b) => b.price - a.price)[0];
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: mostExp.id } : pl));
-          addLog(`🕳️ ${p.name} es succionado hasta ${mostExp.name}!`, 'chaos');
+          addLog('events.chaosCardGoMostExpensive', { player: p.name, square: mostExp.name }, 'chaos');
           break;
         }
         case 'doubleRent':
           setDoubleRentTurns(2);
-          addLog(`🔥 ¡REVOLUCIÓN! Todos los alquileres se DUPLICAN por 2 turnos.`, 'chaos');
+          addLog('events.chaosCardDoubleRent', { turns: 2 }, 'chaos');
           break;
         case 'steal200each': {
           let stolen = 0;
@@ -870,19 +779,19 @@ export default function Raulopoly() {
               return pl;
             });
             next[pidx] = { ...next[pidx], money: next[pidx].money + stolen };
-            addLog(`🦹 ${p.name} roba $200 de cada jugador. Total: $${stolen}`, 'chaos');
+            addLog('events.chaosCardSteal200Each', { player: p.name, total: stolen, amount: 200 }, 'chaos');
             return next;
           });
           break;
         }
         case 'nextDiceX3':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, nextDiceX3: true } : pl));
-          addLog(`🧬 ${p.name} activó MUTACIÓN GENÉTICA. Próximos dados x3!`, 'chaos');
+          addLog('events.chaosCardNextDiceX3', { player: p.name }, 'chaos');
           break;
         case 'randomTeleport': {
           const rnd = Math.floor(Math.random() * 40);
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: rnd } : pl));
-          addLog(`🌀 ${p.name} es teletransportado a ${SQUARE_DATA[rnd].name}.`, 'chaos');
+          addLog('events.chaosCardRandomTeleport', { player: p.name, square: SQUARE_DATA[rnd].name }, 'chaos');
           break;
         }
         case 'collect100each': {
@@ -897,7 +806,7 @@ export default function Raulopoly() {
               return pl;
             });
             next[pidx] = { ...next[pidx], money: next[pidx].money + col };
-            addLog(`✨ ${p.name} cobra $100 de cada jugador por carisma galáctico.`, 'money');
+            addLog('events.chaosCardCollect100Each', { player: p.name, amount: 100 }, 'money');
             return next;
           });
           break;
@@ -907,21 +816,21 @@ export default function Raulopoly() {
           const charge = ownedCount * 50;
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: Math.max(0, pl.money - charge) } : pl));
           setJackpot(jp => jp + charge);
-          addLog(`💸 ${p.name} paga $${charge} (${ownedCount} propiedades × $50 impuesto kármico).`, 'money');
+          addLog('events.chaosCardPayPerProp', { player: p.name, charge, ownedCount }, 'money');
           break;
         }
         case 'nextTurnFree':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, nextTurnFree: true } : pl));
-          addLog(`🛡️ ${p.name} activa ESCUDO DIMENSIONAL. Próximo alquiler: gratis.`, 'event');
+          addLog('events.chaosCardNextTurnFree', { player: p.name }, 'event');
           break;
         case 'bankCharge400':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: Math.max(0, pl.money - 400) } : pl));
           setJackpot(jp => jp + 400);
-          addLog(`🏦 ${p.name} paga $400 por "cuotas de rescate dimensional".`, 'money');
+          addLog('events.chaosCardBankCharge400', { player: p.name, amount: 400 }, 'money');
           break;
         case 'backToStart':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: 0 } : pl));
-          addLog(`👻 ${p.name} retrocede al inicio por bucle temporal. Sin cobrar $200.`, 'chaos');
+          addLog('events.chaosCardBackToStart', { player: p.name }, 'chaos');
           break;
         case 'ghostSteal':
           if (players.filter((_, i) => i !== pidx && players[i].alive).length > 0) {
@@ -932,7 +841,7 @@ export default function Raulopoly() {
           break;
         case 'jackpotBonus':
           setJackpot(jp => jp * 2);
-          addLog(`🎰 ¡BONUS! El Jackpot Galáctico se DUPLICA a $${jackpot * 2}!`, 'chaos');
+          addLog('events.chaosCardJackpotBonus', { amount: jackpot * 2 }, 'chaos');
           break;
       }
     }
@@ -946,13 +855,13 @@ export default function Raulopoly() {
       i === currentIdx ? { ...p, money: p.money - sq.price } : p
     ));
     setPropOwners(prev => ({ ...prev, [squareId]: currentIdx }));
-    addLog(`🏠 ${players[currentIdx].name} compra ${sq.name} por $${sq.price}!`, 'buy');
+    addLog('events.buyProperty', { player: players[currentIdx].name, square: sq.name, price: sq.price }, 'buy');
     setPendingBuy(null);
     setPhase('build');
   }
 
   function skipBuy() {
-    addLog(`😒 ${players[currentIdx].name} pasa de comprar. Una oportunidad galáctica perdida.`, 'normal');
+    addLog('events.skipBuy', { player: players[currentIdx].name }, 'normal');
     setPendingBuy(null);
     setPhase('endturn');
   }
@@ -960,7 +869,7 @@ export default function Raulopoly() {
   function payRent() {
     const { rent, ownerIdx, squareId } = pendingRent;
     const sq = SQUARE_DATA[squareId];
-    addLog(`💸 ${players[currentIdx].name} paga $${rent} de alquiler a ${players[ownerIdx].name} por ${sq.name}.`, 'money');
+    addLog('events.payRent', { player: players[currentIdx].name, rent, owner: players[ownerIdx].name, square: sq.name }, 'money');
     const actual = Math.min(rent, players[currentIdx].money);
     setPlayers(prev => prev.map((p, i) => {
       if (i === currentIdx) return { ...p, money: Math.max(0, p.money - actual) };
@@ -988,7 +897,7 @@ export default function Raulopoly() {
     if (players[currentIdx].money < sq.houseCost) return;
     setPlayers(prev => prev.map((p, i) => i === currentIdx ? { ...p, money: p.money - sq.houseCost } : p));
     setPropHouses(prev => ({ ...prev, [squareId]: houses + 1 }));
-    addLog(`🏗️ ${players[currentIdx].name} construye una ${houses === 4 ? 'FORTALEZA' : 'casa'} en ${sq.name}.`, 'buy');
+    addLog('events.buildHouse', { player: players[currentIdx].name, houseType: houses === 4 ? t('events.fortress') : t('events.house'), square: sq.name }, 'buy');
   }
 
   // ========================= RENDER =========================
@@ -1105,7 +1014,7 @@ export default function Raulopoly() {
   }
 
   const getSquareInfo = (squareType) => {
-    return SQUARE_INFO[language][squareType] || { name: 'Unknown', desc: 'Unknown square' };
+    return squareInfo[squareType] || t('unknownSquare', { returnObjects: true });
   };
 
   function renderCenter() {
@@ -1230,9 +1139,9 @@ export default function Raulopoly() {
                   transition: 'width 0.3s, background 0.3s',
                 }}></div>
               </div>
-              <div style={{ fontSize: 8, color: '#8899aa', marginBottom: 6 }}>{t.turnTime} {turnTimer}s</div>
+              <div style={{ fontSize: 8, color: '#8899aa', marginBottom: 6 }}>{t('turnTime')} {turnTimer}s</div>
               <button onClick={doRoll} style={btnStyle('#44aaff')}>
-                🎲 {t.play} DADOS!
+                🎲 {t('rollDice')}
               </button>
             </div>
           )}
@@ -1242,7 +1151,7 @@ export default function Raulopoly() {
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
                 {players.filter((_, i) => i !== currentIdx && players[i].alive).map(pl => (
                   <button key={pl.id} style={btnStyle(pl.color, true)} onClick={() => {
-                    addLog(`👻 ${p.name} PERSIGUE a ${pl.name}! Pierde $150 extra en su próximo turno.`, 'chaos');
+                    addLog('events.ghostHaunt', { ghost: p.name, target: pl.name, amount: 150 }, 'chaos');
                     setPlayers(prev => prev.map((x, i) => i === pl.id ? { ...x, money: Math.max(0, x.money - 150) } : x));
                     doEndTurn();
                   }}>
@@ -1267,20 +1176,20 @@ export default function Raulopoly() {
           {phase === 'payrent' && pendingRent && (
             <div>
               <div style={{ fontSize: 10, color: '#ff8888', marginBottom: 4 }}>
-                Debes pagar <strong>${pendingRent.rent}</strong> a {players[pendingRent.ownerIdx]?.name}.
-                {players[currentIdx].freeJailCards > 0 && ' (Tienes escudo de cárcel, no sirve aquí 😅)'}
+                {t('events.payRentPrompt', { rent: pendingRent.rent, owner: players[pendingRent.ownerIdx]?.name })}
+                {players[currentIdx].freeJailCards > 0 && ` ${t('events.jailShieldNoUse')}`}
               </div>
-              <button onClick={payRent} style={btnStyle('#ff4488')}>💸 PAGAR ALQUILER</button>
+              <button onClick={payRent} style={btnStyle('#ff4488')}>💸 {t('events.payRentButton')}</button>
             </div>
           )}
           {phase === 'card' && activeCard && (
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 16 }}>{activeCard.emoji}</div>
               <div style={{ fontSize: 10, color: activeCard.source === 'chest' ? '#ff4488' : '#44aaff', fontFamily: '"Orbitron", sans-serif' }}>
-                {activeCard.title || 'PODER DEL CAOS'}
+                {t(`${getCardI18nPrefix(activeCard)}.${activeCard.id}.title`)}
               </div>
               <div style={{ fontSize: 9, color: '#ccc', margin: '2px 0', lineHeight: 1.3 }}>
-                {activeCard.text || activeCard.emoji}
+                {t(`${getCardI18nPrefix(activeCard)}.${activeCard.id}.text`)}
               </div>
               <button onClick={() => applyCardEffect(activeCard, currentIdx)} style={btnStyle('#ff9944')}>
                 ⚡ EJECUTAR EFECTO
@@ -1289,7 +1198,7 @@ export default function Raulopoly() {
           )}
           {phase === 'ghoststeal' && (
             <div>
-              <div style={{ fontSize: 10, color: '#ff4488' }}>👻 Elige a qué jugador ROBARLE una propiedad:</div>
+              <div style={{ fontSize: 10, color: '#ff4488' }}>👻 {t('events.ghostStealPrompt')}</div>
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
                 {players.filter((_, i) => i !== currentIdx && players[i].alive && Object.values(propOwners).some(o => o === i)).map(pl => (
                   <button key={pl.id} style={btnStyle(pl.color, true)} onClick={() => {
@@ -1297,7 +1206,7 @@ export default function Raulopoly() {
                     if (theirProps.length > 0) {
                       const [stolenId] = theirProps[Math.floor(Math.random() * theirProps.length)];
                       setPropOwners(prev => ({ ...prev, [stolenId]: currentIdx }));
-                      addLog(`🫀 ${players[currentIdx].name} ROBA ${SQUARE_DATA[stolenId].name} de ${pl.name}!`, 'chaos');
+                      addLog('events.ghostStealProperty', { player: players[currentIdx].name, square: SQUARE_DATA[stolenId].name, target: pl.name }, 'chaos');
                     }
                     setActiveCard(null);
                     setPendingGhostSteal(null);
@@ -1349,7 +1258,7 @@ export default function Raulopoly() {
               lineHeight: 1.3,
               opacity: 1 - i * 0.08,
             }}>
-              {entry.msg}
+              {entry.key ? t(entry.key, entry.params) : entry.message}
             </div>
           ))}
         </div>
@@ -1374,7 +1283,7 @@ export default function Raulopoly() {
   // ========================= SCREENS =========================
 
   // Tutorial Screen
-  if (showTutorial) {
+  if (tutorialVisible) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -1398,15 +1307,15 @@ export default function Raulopoly() {
         }}>
           <div style={{ fontSize: 48, fontWeight: 900, marginBottom: 20 }}>🔍</div>
           <div style={{ fontSize: 32, fontWeight: 900, color: '#44aaff', marginBottom: 12, letterSpacing: 2 }}>
-            {t.tutorialIntro}
+            {t('tutorialIntro')}
           </div>
           <div style={{ fontSize: 14, color: '#8899aa', marginBottom: 30, lineHeight: 1.6 }}>
-            {t.tutorialDesc}
+            {t('tutorialDesc')}
           </div>
           
           {/* Features List */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 30 }}>
-            {t.features.map((feature, i) => (
+            {features.map((feature, i) => (
               <div key={i} style={{
                 background: '#0a1520',
                 border: '1px solid #1a2a3a',
@@ -1427,16 +1336,16 @@ export default function Raulopoly() {
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button onClick={() => {
               localStorage.setItem('raulopolyTutorialSeen', 'true');
-              setShowTutorial(false);
+              setTutorialVisible(false);
               setScreen('rules');
             }} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '10px 30px', width: 'auto' }}>
-              {t.startGame}
+              {t('startGame')}
             </button>
             <button onClick={() => {
               localStorage.setItem('raulopolyTutorialSeen', 'true');
-              setShowTutorial(false);
+              setTutorialVisible(false);
             }} style={{ ...btnStyle('#666'), fontSize: 12, padding: '8px 20px', width: 'auto' }}>
-              {t.skipTutorial}
+              {t('skipTutorial')}
             </button>
           </div>
         </div>
@@ -1499,13 +1408,13 @@ export default function Raulopoly() {
           textShadow: 'none',
           animation: 'pulse 2s infinite',
         }}>
-          {t.title}
+          {t('title')}
         </div>
         <div style={{ color: '#8899aa', fontSize: 13, letterSpacing: 3 }}>
-          {t.subtitle}
+          {t('subtitle')}
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 600, fontSize: 11, color: '#667788' }}>
-          {t.features.map(feature => (
+          {features.map(feature => (
             <div key={feature.title} style={{ background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: '8px 12px', width: 160, textAlign: 'center' }}>
               <div style={{ fontSize: 14 }}>{feature.title}</div>
               <div style={{ fontSize: 9, marginTop: 3, color: '#556677' }}>{feature.desc}</div>
@@ -1518,15 +1427,15 @@ export default function Raulopoly() {
               ⏳ REANUDAR ÚTIMA PARTIDA
             </button>
             <button onClick={() => { localStorage.removeItem('raulopolyGame'); setHasSavedGame(false); }} style={{ ...btnStyle('#aa4444'), fontSize: 12, padding: '6px 12px' }}>
-              {t.delete}
+              {t('delete')}
             </button>
           </div>
         )}
         <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#44aaff'), fontSize: 16, padding: '10px 30px' }}>
-          🚀 {t.play}
+          🚀 {t('play')}
         </button>
-        <button onClick={() => setShowTutorial(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
-          {t.tutorial}
+        <button onClick={() => setTutorialVisible(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
+          {t('tutorial')}
         </button>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }`}</style>
       </div>
@@ -1547,18 +1456,18 @@ export default function Raulopoly() {
         color: '#fff'
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
-        <div style={{ fontSize: 36, fontWeight: 900 }}>{t.rules}</div>
+        <div style={{ fontSize: 36, fontWeight: 900 }}>{t('rules')}</div>
         <div style={{ maxWidth: 600, textAlign: 'left', fontSize: 14 }}>
           <ul style={{ paddingLeft: 20 }}>
-            {RULES_TEXT.map((r, i) => <li key={i} style={{ marginBottom: 6 }}>{r}</li>)}
+            {rulesText.map((r, i) => <li key={i} style={{ marginBottom: 6 }}>{r}</li>)}
           </ul>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <button onClick={() => setScreen('setup')} style={{ ...btnStyle('#44aaff'), fontSize: 14, padding: '8px 24px' }}>
-            {t.understood}
+            {t('understood')}
           </button>
           <button onClick={() => setScreen('menu')} style={{ ...btnStyle('#aa4444'), fontSize: 14, padding: '8px 24px' }}>
-            {t.back}
+            {t('back')}
           </button>
         </div>
       </div>
@@ -1581,12 +1490,12 @@ export default function Raulopoly() {
         padding: '20px',
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
-        <div style={{ fontSize: 28, fontWeight: 900, color: '#44aaff', letterSpacing: 4 }}>{t.config}</div>
-        <div style={{ fontSize: 12, color: '#8899aa' }}>{t.customize}</div>
+        <div style={{ fontSize: 28, fontWeight: 900, color: '#44aaff', letterSpacing: 4 }}>{t('config')}</div>
+        <div style={{ fontSize: 12, color: '#8899aa' }}>{t('customize')}</div>
         
         {/* Selección de jugadores */}
         <div style={{ width: 400, background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: 12 }}>
-          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t.players}</div>
+          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t('players')}</div>
           <div style={{ display: 'flex', gap: 10 }}>
             {[2, 3, 4].map(n => (
               <button key={n} onClick={() => setNumPlayers(n)} style={{
@@ -1601,7 +1510,7 @@ export default function Raulopoly() {
         
         {/* Nombres de jugadores */}
         <div style={{ width: 400, background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: 12 }}>
-          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t.names}</div>
+          <div style={{ fontSize: 11, color: '#8899aa', marginBottom: 8 }}>{t('names')}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {Array.from({ length: numPlayers }, (_, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1630,7 +1539,7 @@ export default function Raulopoly() {
         
         {/* Botón para mostrar/ocultar configuración avanzada */}
         <button onClick={() => setShowAdvancedSettings(!showAdvancedSettings)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '6px 16px' }}>
-          {showAdvancedSettings ? '⌄' : '⌃'} {t.advancedSettings}
+          {showAdvancedSettings ? '⌄' : '⌃'} {t('advancedSettings')}
         </button>
         
         {/* Configuración avanzada */}
@@ -1640,7 +1549,7 @@ export default function Raulopoly() {
             
             {/* Dinero inicial */}
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t.initialMoney}: ${initialMoney}</div>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t('initialMoney')}: ${initialMoney}</div>
               <input 
                 type="range" 
                 min="500" 
@@ -1654,7 +1563,7 @@ export default function Raulopoly() {
             
             {/* Multiplicador de alquiler */}
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t.rentMultiplier}: x{rentMultiplier.toFixed(1)}</div>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t('rentMultiplier')}: x{rentMultiplier.toFixed(1)}</div>
               <input 
                 type="range" 
                 min="0.5" 
@@ -1668,7 +1577,7 @@ export default function Raulopoly() {
             
             {/* Probabilidad de Caos */}
             <div style={{ marginBottom: 6 }}>
-              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t.chaosChance}: {(chaosChance*100).toFixed(0)}%</div>
+              <div style={{ fontSize: 10, color: '#8899aa', marginBottom: 4 }}>{t('chaosChance')}: {(chaosChance*100).toFixed(0)}%</div>
               <input 
                 type="range" 
                 min="0" 
@@ -1685,10 +1594,10 @@ export default function Raulopoly() {
         {/* Botones de acción */}
         <div style={{ display: 'flex', gap: 12 }}>
           <button onClick={startGame} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '8px 24px' }}>
-            🚀 {t.start}
+            🚀 {t('start')}
           </button>
           <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#aa4444'), fontSize: 14, padding: '8px 24px' }}>
-            {t.back}
+            {t('back')}
           </button>
         </div>
       </div>
@@ -1730,9 +1639,9 @@ export default function Raulopoly() {
             fontFamily: '"Orbitron", sans-serif',
             color: '#fff',
           }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: '#44aaff' }}>{t.helpTitle}</div>
+            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: '#44aaff' }}>{t('helpTitle')}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 11 }}>
-              {Object.entries(SQUARE_INFO[language]).map(([key, info]) => (
+              {Object.entries(squareInfo).map(([key, info]) => (
                 <div key={key} style={{ background: '#0a2030', border: '1px solid #1a3a4a', borderRadius: 4, padding: 8 }}>
                   <div style={{ color: '#44ff88', fontWeight: 700, marginBottom: 4 }}>{info.name}</div>
                   <div style={{ color: '#8899aa', fontSize: 9, lineHeight: 1.3 }}>{info.desc}</div>
@@ -1740,7 +1649,7 @@ export default function Raulopoly() {
               ))}
             </div>
             <button onClick={() => setShowHelp(false)} style={{ ...btnStyle('#44aaff'), marginTop: 12, width: '100%' }}>
-              {t.close}
+              {t('close')}
             </button>
           </div>
         </div>
@@ -1748,7 +1657,7 @@ export default function Raulopoly() {
       {/* Top-right controls */}
       <div style={{ position: 'fixed', top: 10, right: 10, display: 'flex', gap: 8, zIndex: 100 }}>
         <button onClick={() => setShowHelp(!showHelp)} style={{ ...btnStyle('#ffaa00'), fontSize: 14 }}>
-          {t.help}
+          {t('help')}
         </button>
         <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 11 }}>ES</button>
         <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 11 }}>EN</button>
@@ -1780,7 +1689,7 @@ export default function Raulopoly() {
         gap: 4,
       }}>
         <div style={{ fontFamily: '"Orbitron", sans-serif', fontSize: 10, color: '#44aaff', marginBottom: 4 }}>
-          MAPA DE PROPIEDADES
+          {t('propertyMap')}
         </div>
         {Object.entries(GROUP_SQUARES).map(([group, ids]) => (
           <div key={group} style={{
@@ -1823,7 +1732,7 @@ export default function Raulopoly() {
         <div style={{
           background: '#0a1520', border: '1px solid #334455', borderRadius: 4, padding: '4px 6px',
         }}>
-          <div style={{ fontSize: 8, color: '#888', fontFamily: '"Orbitron", sans-serif', marginBottom: 2 }}>OTRAS</div>
+          <div style={{ fontSize: 8, color: '#888', fontFamily: '"Orbitron", sans-serif', marginBottom: 2 }}>{t('otherProperties')}</div>
           {[...RAILROADS, ...UTILITIES].map(id => {
             const owner = propOwners[id];
             const sq = SQUARE_DATA[id];
@@ -1836,9 +1745,9 @@ export default function Raulopoly() {
             );
           })}
         </div>
-        <button onClick={() => { if (window.confirm('¿Abandonar la partida?')) setScreen('menu'); }}
+        <button onClick={() => { if (window.confirm(t('exitConfirmation'))) setScreen('menu'); }}
           style={{ ...btnStyle('#333', true), marginTop: 8, width: '100%' }}>
-          🚪 Salir
+          {t('exit')}
         </button>
       </div>
     </div>

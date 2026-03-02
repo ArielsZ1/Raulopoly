@@ -1,16 +1,7 @@
-import {
-  CHAOS_CARDS,
-  GROUP_COLORS,
-  PLAYER_CONFIGS,
-  SQUARE_DATA,
-  getGridPos,
-  getSquareRotation,
-  useGameEngine,
-} from "../hooks/useGameEngine";
-
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "../i18n/I18nProvider";
 import { clearSavedGame, getSavedGame, getTutorialSeen, setSavedGame, setTutorialSeen } from "../services/storageService";
+import { useTurnTimer } from "../hooks/useTurnTimer";
 
 // ========================= GAME DATA =========================
 
@@ -286,36 +277,25 @@ export default function Raulopoly() {
     }
   }, []);
 
-  const [turnTimer, setTurnTimer] = useState(60);
   const [showHelp, setShowHelp] = useState(false);
   const [showTutorial, setShowTutorial] = useState(() => !getTutorialSeen());
+
+  const { turnTimer, resetTimer } = useTurnTimer({
+    screen,
+    phase,
+    onTimeout: () => {
+      playSound('jail');
+      nextTurn(players, currentIdx);
+    },
+  });
 
   const features = t('features', { returnObjects: true }) || [];
   const squareInfo = t('squareInfo', { returnObjects: true }) || {};
   const rulesText = t('rulesText', { returnObjects: true }) || [];
 
-  // Timer effect - reduce 1 segundo cada segundo durante el juego
   useEffect(() => {
-    if (screen !== 'game' || phase === 'card' || phase === 'buydecision' || phase === 'payrent' || phase === 'endturn') {
-      return;
-    }
-    const timer = setInterval(() => {
-      setTurnTimer(prev => {
-        if (prev <= 1) {
-          playSound('jail'); // sonido de alerta
-          nextTurn(players, currentIdx);
-          return 60;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [screen, phase, players, currentIdx, playSound, nextTurn]);
-
-  // Resetear timer al cambiar de turno
-  useEffect(() => {
-    setTurnTimer(60);
-  }, [currentIdx]);
+    resetTimer();
+  }, [currentIdx, resetTimer]);
 
   const addLog = useCallback((msg, type = 'normal') => {
     setLog(prev => [{ msg, type, id: Date.now() + Math.random() }, ...prev].slice(0, 30));

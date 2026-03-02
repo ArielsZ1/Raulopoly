@@ -277,14 +277,6 @@ export default function Raulopoly() {
 
   const [turnTimer, setTurnTimer] = useState(60);
   const [showHelp, setShowHelp] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(() => {
-    try {
-      const seen = localStorage.getItem('raulopolyTutorialSeen');
-      return !seen; // Mostrar solo si no ha sido visto
-    } catch (e) {
-      return false; // Si hay error, no mostrar tutorial
-    }
-  });
   const [showTutorial, setShowTutorial] = useState(() => !getTutorialSeen());
 
   const features = t('features', { returnObjects: true }) || [];

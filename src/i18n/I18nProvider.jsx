@@ -9,10 +9,12 @@ const fallbackLng = 'es';
 const I18nContext = createContext(null);
 
 const getByPath = (obj, path) => path.split('.').reduce((acc, key) => acc?.[key], obj);
-const interpolate = (template, options) => template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => {
-  const value = options[key];
-  return value === undefined || value === null ? '' : String(value);
-});
+
+const interpolate = (template, options) =>
+  template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => {
+    const value = options[key];
+    return value === undefined || value === null ? '' : String(value);
+  });
 
 const getInitialLanguage = () => {
   try {
@@ -39,14 +41,19 @@ export function I18nProvider({ children }) {
   }, [language]);
 
   const t = useCallback((key, options = {}) => {
-    const value = getByPath(resources[language], key) ?? getByPath(resources[fallbackLng], key);
+    const value =
+      getByPath(resources[language], key) ??
+      getByPath(resources[fallbackLng], key);
+
     if (options.returnObjects) return value;
+
     if (typeof value !== 'string') {
       if (import.meta.env.DEV) {
         console.warn(`[i18n] Missing key: "${key}"`);
       }
       return key;
     }
+
     return interpolate(value, options);
   }, [language]);
 

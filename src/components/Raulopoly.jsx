@@ -1241,7 +1241,8 @@ export default function Raulopoly() {
     boxShadow: `0 0 8px ${color}44`,
     transition: 'all 0.15s',
     margin: 2,
-  }), []);
+  });
+
 
   const buildOptions = useMemo(() => (
     Object.entries(propOwners)
@@ -1761,7 +1762,7 @@ export default function Raulopoly() {
         <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 11 }} aria-label="Cambiar idioma a español" title="Cambiar idioma a español">ES</button>
         <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 11 }} aria-label="Switch language to English" title="Switch language to English">EN</button>
       </div>
-      <Board
+            <Board
         boardSize={BOARD_SIZE}
         cellSize={CELL_SIZE}
         squares={SQUARE_DATA}

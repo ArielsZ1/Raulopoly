@@ -549,7 +549,7 @@ export default function Raulopoly() {
   const loadGame = useCallback(() => {
     let saved = null;
     try {
-      saved = localStorage.getItem("raulopolyGame");
+      saved = localStorage.getItem('raulopolyGame');
     } catch (_) {
       saved = null;
     }
@@ -575,11 +575,11 @@ export default function Raulopoly() {
           setPlayerNames(gameState.playerNames);
           setInitialMoney(gameState.settings?.initialMoney ?? 1500);
           setRentMultiplier(gameState.settings?.rentMultiplier ?? 1);
-          setChaoschance(gameState.settings?.chaosChance ?? 0.3);
-          setScreen("game");
+          setChaoschance(gameState.settings?.chaosChance ?? 0.30);
+          setScreen('game');
         }
       } catch (error) {
-        console.log("No saved game found");
+        console.log('No saved game found');
       }
     }
   }, []);

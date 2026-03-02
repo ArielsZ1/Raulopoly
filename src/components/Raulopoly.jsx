@@ -8,17 +8,6 @@ import {
   useGameEngine,
 } from "../hooks/useGameEngine";
 
-export default function Raulopoly() {
-  const {
-    t, screen, setScreen, numPlayers, setNumPlayers, players, setPlayers, currentIdx, phase, setPhase,
-    dice, chaosDie, propOwners, setPropOwners, propHouses, log, jackpot, activeCard, setActiveCard,
-    pendingBuy, pendingRent, winner, animDice, pendingGhostSteal, setPendingGhostSteal,
-    playerNames, setPlayerNames, initialMoney, setInitialMoney, rentMultiplier, setRentMultiplier,
-    chaosChance, setChaoschance, hasSavedGame, showAdvancedSettings, setShowAdvancedSettings,
-    turnTimer, setTurnTimer, showHelp, setShowHelp, showTutorial, setShowTutorial,
-    features, squareInfo, rulesText,
-    startGame, hasMonopoly, doRoll, applyCardEffect, buyProperty, skipBuy, payRent, doEndTurn, buildHouse, loadGame, saveGame,
-  } = useGameEngine();
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "../i18n/I18nProvider";
 import { clearSavedGame, getSavedGame, getTutorialSeen, setSavedGame, setTutorialSeen } from "../services/storageService";

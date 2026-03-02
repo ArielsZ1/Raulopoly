@@ -282,8 +282,12 @@ export default function Raulopoly() {
   const [turnTimer, setTurnTimer] = useState(60);
   const [showHelp, setShowHelp] = useState(false);
   const [showTutorial, setShowTutorial] = useState(() => {
-    const seen = localStorage.getItem('raulopolyTutorialSeen');
-    return !seen; // Mostrar solo si no ha sido visto
+    try {
+      const seen = localStorage.getItem('raulopolyTutorialSeen');
+      return !seen; // Mostrar solo si no ha sido visto
+    } catch (e) {
+      return false; // Si hay error, no mostrar tutorial
+    }
   });
 
   // Objeto de traducciones
@@ -311,6 +315,19 @@ export default function Raulopoly() {
       turnTime: 'Tiempo restante:',
       helpTitle: 'Ayuda - Tipos de Casilla',
       close: 'Cerrar',
+      tutorial: 'Tutorial Interactivo',
+      tutorialIntro: '¡Bienvenido a RAULOPOLY!',
+      tutorialDesc: 'Tu objetivo es convertirte en el jugador más rico mientras navegas un tablero galáctico caótico. ¡Compra propiedades, cobra alquiler y sobrevive el caos!',
+      features: [
+        { title: '🎲 Dado del Caos', desc: '30% de efectos salvajes en cada turno' },
+        { title: '👻 Modo Fantasma', desc: 'Los arruinados se convierten en espectros vengativos' },
+        { title: '🎰 Jackpot Galáctico', desc: 'El parking libre acumula dinero REAL' },
+        { title: '☄️ Meteoritos', desc: 'Las casas pueden ser destruidas en cualquier momento' },
+        { title: '🔀 Teletransportadores', desc: 'El tablero te mueve a donde no quieres' },
+        { title: '🦹 Robo Cuántico', desc: 'Puedes robar dinero y propiedades a otros' },
+      ],
+      startGame: 'Comenzar Juego',
+      skipTutorial: 'Saltar Tutorial',
     },
     en: {
       title: 'RAULOPOLY',

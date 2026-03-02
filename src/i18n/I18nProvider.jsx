@@ -39,6 +39,7 @@ export function I18nProvider({ children }) {
       }
       return key;
     }
+    if (typeof value !== 'string') return key;
     return interpolate(value, options);
   }, [language]);
 

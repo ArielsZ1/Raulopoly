@@ -220,28 +220,31 @@ export default function Raulopoly() {
     if (saved) {
       try {
         const gameState = JSON.parse(saved);
-    const gameState = getSavedGame();
-    if (gameState) {
-        setNumPlayers(gameState.numPlayers);
-        setPlayers(gameState.players);
-        setCurrentIdx(gameState.currentIdx);
-        setPhase(gameState.phase);
-        setDice(gameState.dice);
-        setChaosDie(gameState.chaosDie);
-        setPropOwners(gameState.propOwners);
-        setPropHouses(gameState.propHouses);
-        setLog(gameState.log);
-        setJackpot(gameState.jackpot);
-        setActiveCard(gameState.activeCard);
-        setDoubleRentTurns(gameState.doubleRentTurns);
-        setPendingBuy(gameState.pendingBuy);
-        setPendingRent(gameState.pendingRent);
-        setWinner(gameState.winner);
-        setPlayerNames(gameState.playerNames);
-        setInitialMoney(gameState.settings?.initialMoney ?? 1500);
-        setRentMultiplier(gameState.settings?.rentMultiplier ?? 1);
-        setChaoschance(gameState.settings?.chaosChance ?? 0.30);
-        setScreen('game');
+        // NO DECLARAR gameState DE NUEVO aquí
+        if (gameState) {
+          setPlayers(gameState.players);
+          setCurrentIdx(gameState.currentIdx);
+          setPhase(gameState.phase);
+          setDice(gameState.dice);
+          setChaosDie(gameState.chaosDie);
+          setPropOwners(gameState.propOwners);
+          setPropHouses(gameState.propHouses);
+          setLog(gameState.log);
+          setJackpot(gameState.jackpot);
+          setActiveCard(gameState.activeCard);
+          setDoubleRentTurns(gameState.doubleRentTurns);
+          setPendingBuy(gameState.pendingBuy);
+          setPendingRent(gameState.pendingRent);
+          setWinner(gameState.winner);
+          setPlayerNames(gameState.playerNames);
+          setInitialMoney(gameState.settings?.initialMoney ?? 1500);
+          setRentMultiplier(gameState.settings?.rentMultiplier ?? 1);
+          setChaoschance(gameState.settings?.chaosChance ?? 0.30);
+          setScreen('game');
+        }
+      } catch (error) {
+        console.log('No saved game found');
+      }
     }
   }, []);
 
@@ -1481,7 +1484,6 @@ export default function Raulopoly() {
           🚀 {t('play')}
         </button>
         <button onClick={() => setTutorialVisible(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
-        <button onClick={() => setShowTutorial(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
           {t('tutorial')}
         </button>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }`}</style>

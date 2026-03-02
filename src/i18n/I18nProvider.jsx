@@ -33,6 +33,12 @@ export function I18nProvider({ children }) {
   const t = useCallback((key, options = {}) => {
     const value = getByPath(resources[language], key) ?? getByPath(resources[fallbackLng], key);
     if (options.returnObjects) return value;
+    if (typeof value !== 'string') {
+      if (import.meta.env.DEV) {
+        console.warn(`[i18n] Missing key: "${key}"`);
+      }
+      return key;
+    }
     if (typeof value !== 'string') return key;
     return interpolate(value, options);
   }, [language]);

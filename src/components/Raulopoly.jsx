@@ -201,11 +201,25 @@ export default function Raulopoly() {
       pendingBuy, pendingRent, winner, playerNames,
       settings: { initialMoney, rentMultiplier, chaosChance }
     };
+    try {
+      localStorage.setItem('raulopolyGame', JSON.stringify(gameState));
+    } catch (_) {
+      // noop: storage unavailable
+    }
     setSavedGame(gameState);
   }, [screen, numPlayers, players, currentIdx, phase, dice, chaosDie, propOwners, propHouses, log, jackpot, activeCard, doubleRentTurns, pendingBuy, pendingRent, winner, playerNames, initialMoney, rentMultiplier, chaosChance]);
 
   // Función para cargar partida desde localStorage
   const loadGame = useCallback(() => {
+    let saved = null;
+    try {
+      saved = localStorage.getItem('raulopolyGame');
+    } catch (_) {
+      saved = null;
+    }
+    if (saved) {
+      try {
+        const gameState = JSON.parse(saved);
     const gameState = getSavedGame();
     if (gameState) {
         setNumPlayers(gameState.numPlayers);
@@ -283,6 +297,14 @@ export default function Raulopoly() {
 
   const [turnTimer, setTurnTimer] = useState(60);
   const [showHelp, setShowHelp] = useState(false);
+  const [tutorialVisible, setTutorialVisible] = useState(() => {
+    try {
+      const seen = localStorage.getItem('raulopolyTutorialSeen');
+      return !seen; // Mostrar solo si no ha sido visto
+    } catch (e) {
+      return false; // Si hay error, no mostrar tutorial
+    }
+  });
   const [showTutorial, setShowTutorial] = useState(() => !getTutorialSeen());
 
   const features = t('features', { returnObjects: true }) || [];
@@ -1300,7 +1322,7 @@ export default function Raulopoly() {
   // ========================= SCREENS =========================
 
   // Tutorial Screen
-  if (showTutorial) {
+  if (tutorialVisible) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -1353,6 +1375,8 @@ export default function Raulopoly() {
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button onClick={() => {
+              localStorage.setItem('raulopolyTutorialSeen', 'true');
+              setTutorialVisible(false);
               setTutorialSeen(true);
               setShowTutorial(false);
               setScreen('rules');
@@ -1360,6 +1384,8 @@ export default function Raulopoly() {
               {t('startGame')}
             </button>
             <button onClick={() => {
+              localStorage.setItem('raulopolyTutorialSeen', 'true');
+              setTutorialVisible(false);
               setTutorialSeen(true);
               setShowTutorial(false);
             }} style={{ ...btnStyle('#666'), fontSize: 12, padding: '8px 20px', width: 'auto' }}>
@@ -1454,6 +1480,7 @@ export default function Raulopoly() {
         <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#44aaff'), fontSize: 16, padding: '10px 30px' }}>
           🚀 {t('play')}
         </button>
+        <button onClick={() => setTutorialVisible(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
         <button onClick={() => setShowTutorial(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
           {t('tutorial')}
         </button>

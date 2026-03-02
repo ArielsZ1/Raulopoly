@@ -15,6 +15,12 @@ const interpolate = (template, options) => template.replace(/\{\{\s*(\w+)\s*\}\}
 });
 
 const getInitialLanguage = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored && resources[stored]) return stored;
+  } catch (_) {
+    // Storage can be blocked in some browsers/privacy modes
+  }
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored && resources[stored]) return stored;
 
@@ -26,6 +32,11 @@ export function I18nProvider({ children }) {
   const [language, setLanguage] = useState(getInitialLanguage);
 
   useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, language);
+    } catch (_) {
+      // noop: storage unavailable
+    }
     localStorage.setItem(STORAGE_KEY, language);
     document.documentElement.lang = language;
   }, [language]);

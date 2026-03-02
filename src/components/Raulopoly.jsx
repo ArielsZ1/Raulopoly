@@ -206,6 +206,7 @@ export default function Raulopoly() {
     } catch (_) {
       // noop: storage unavailable
     }
+    setSavedGame(gameState);
   }, [screen, numPlayers, players, currentIdx, phase, dice, chaosDie, propOwners, propHouses, log, jackpot, activeCard, doubleRentTurns, pendingBuy, pendingRent, winner, playerNames, initialMoney, rentMultiplier, chaosChance]);
 
   // Función para cargar partida desde localStorage
@@ -219,6 +220,8 @@ export default function Raulopoly() {
     if (saved) {
       try {
         const gameState = JSON.parse(saved);
+    const gameState = getSavedGame();
+    if (gameState) {
         setNumPlayers(gameState.numPlayers);
         setPlayers(gameState.players);
         setCurrentIdx(gameState.currentIdx);
@@ -235,13 +238,10 @@ export default function Raulopoly() {
         setPendingRent(gameState.pendingRent);
         setWinner(gameState.winner);
         setPlayerNames(gameState.playerNames);
-        setInitialMoney(gameState.settings.initialMoney);
-        setRentMultiplier(gameState.settings.rentMultiplier);
-        setChaoschance(gameState.settings.chaosChance);
+        setInitialMoney(gameState.settings?.initialMoney ?? 1500);
+        setRentMultiplier(gameState.settings?.rentMultiplier ?? 1);
+        setChaoschance(gameState.settings?.chaosChance ?? 0.30);
         setScreen('game');
-      } catch (e) {
-        console.error('Error al cargar partida:', e);
-      }
     }
   }, []);
 
@@ -305,13 +305,13 @@ export default function Raulopoly() {
       return false; // Si hay error, no mostrar tutorial
     }
   });
+  const [showTutorial, setShowTutorial] = useState(() => !getTutorialSeen());
 
   const features = t('features', { returnObjects: true }) || [];
   const squareInfo = t('squareInfo', { returnObjects: true }) || {};
   const rulesText = t('rulesText', { returnObjects: true }) || [];
   const getCardI18nPrefix = (card) => card?.source === 'chest' ? 'chaosCards' : 'powerCards';
 
-  // Timer effect - reduce 1 segundo cada segundo durante el juego
   useEffect(() => {
     if (screen !== 'game' || phase === 'card' || phase === 'buydecision' || phase === 'payrent' || phase === 'endturn') {
       return;
@@ -408,6 +408,7 @@ export default function Raulopoly() {
         ? reason
         : { player: next[fromIdx].name, amount: actual };
       addLog(transferKey, transferParams, 'money');
+      addLog(reason || 'events.transferToBank', reason ? {} : { player: next[fromIdx].name, amount: actual }, 'money');
       // check bankruptcy
       if (next[fromIdx].money <= 0 && !next[fromIdx].isGhost) {
         next[fromIdx].money = 0;
@@ -900,7 +901,6 @@ export default function Raulopoly() {
     addLog('events.buildHouse', { player: players[currentIdx].name, houseType: houses === 4 ? t('events.fortress') : t('events.house'), square: sq.name }, 'buy');
   }
 
-  // ========================= RENDER =========================
 
   const CELL_SIZE = 54;
   const BOARD_SIZE = 11 * CELL_SIZE;
@@ -1083,10 +1083,6 @@ export default function Raulopoly() {
           ))}
         </div>
 
-        {/* Jackpot */}
-        <div style={{ fontSize: 11, color: '#ffdd44', fontFamily: 'monospace' }}>
-          🎰 Jackpot Galáctico: <strong>${jackpot}</strong>
-        </div>
 
         {/* Dice */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -1280,6 +1276,49 @@ export default function Raulopoly() {
     margin: 2,
   });
 
+
+  const buildOptions = useMemo(() => (
+    Object.entries(propOwners)
+      .filter(([id, o]) => o === currentIdx && SQUARE_DATA[id]?.type === 'property' && hasMonopoly(currentIdx, SQUARE_DATA[id].group) && (propHouses[id] || 0) < 5)
+      .map(([id]) => ({ id, color: GROUP_COLORS[SQUARE_DATA[id].group] || '#888', label: SQUARE_DATA[id].name.slice(0, 10) }))
+  ), [propOwners, currentIdx, propHouses]);
+
+  const handleExitGame = useCallback(() => {
+    if (window.confirm(t('exitConfirmation'))) setScreen('menu');
+  }, [t]);
+
+  useEffect(() => {
+    if (!showHelp) return;
+
+    helpCloseButtonRef.current?.focus();
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setShowHelp(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showHelp]);
+
+  useEffect(() => {
+    if (!showTutorial) return;
+
+    tutorialCloseButtonRef.current?.focus();
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setTutorialSeen(true);
+        setShowTutorial(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showTutorial]);
+
+
   // ========================= SCREENS =========================
 
   // Tutorial Screen
@@ -1296,6 +1335,7 @@ export default function Raulopoly() {
         padding: 20,
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+        <style>{`button:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 2px #44aaff;}`}</style>
         <div style={{
           background: 'linear-gradient(135deg, #0a1525 0%, #1a0525 100%)',
           border: '2px solid #44aaff',
@@ -1304,7 +1344,7 @@ export default function Raulopoly() {
           maxWidth: 700,
           textAlign: 'center',
           boxShadow: '0 0 40px #44aaff44, inset 0 0 20px #44aaff11',
-        }}>
+        }} role="dialog" aria-modal="true" aria-labelledby="tutorial-dialog-title">
           <div style={{ fontSize: 48, fontWeight: 900, marginBottom: 20 }}>🔍</div>
           <div style={{ fontSize: 32, fontWeight: 900, color: '#44aaff', marginBottom: 12, letterSpacing: 2 }}>
             {t('tutorialIntro')}
@@ -1337,6 +1377,8 @@ export default function Raulopoly() {
             <button onClick={() => {
               localStorage.setItem('raulopolyTutorialSeen', 'true');
               setTutorialVisible(false);
+              setTutorialSeen(true);
+              setShowTutorial(false);
               setScreen('rules');
             }} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '10px 30px', width: 'auto' }}>
               {t('startGame')}
@@ -1344,6 +1386,8 @@ export default function Raulopoly() {
             <button onClick={() => {
               localStorage.setItem('raulopolyTutorialSeen', 'true');
               setTutorialVisible(false);
+              setTutorialSeen(true);
+              setShowTutorial(false);
             }} style={{ ...btnStyle('#666'), fontSize: 12, padding: '8px 20px', width: 'auto' }}>
               {t('skipTutorial')}
             </button>
@@ -1364,6 +1408,7 @@ export default function Raulopoly() {
         fontFamily: '"Orbitron", sans-serif',
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+        <style>{`button:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 2px #44aaff;}`}</style>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 80 }}>{winner?.emoji}</div>
           <div style={{
@@ -1396,9 +1441,10 @@ export default function Raulopoly() {
         gap: 30,
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+        <style>{`button:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 2px #44aaff;}`}</style>
         <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 10 }}>
-          <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 12 }}>ES</button>
-          <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 12 }}>EN</button>
+          <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 12 }} aria-label="Cambiar idioma a español" title="Cambiar idioma a español">ES</button>
+          <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 12 }} aria-label="Switch language to English" title="Switch language to English">EN</button>
         </div>
         <div style={{
           fontSize: 56, fontWeight: 900,
@@ -1435,6 +1481,7 @@ export default function Raulopoly() {
           🚀 {t('play')}
         </button>
         <button onClick={() => setTutorialVisible(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
+        <button onClick={() => setShowTutorial(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
           {t('tutorial')}
         </button>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }`}</style>
@@ -1617,6 +1664,7 @@ export default function Raulopoly() {
       boxSizing: 'border-box',
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+      <style>{`button:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 2px #44aaff;}`}</style>
       {/* Help Modal */}
       {showHelp && (
         <div style={{
@@ -1644,7 +1692,7 @@ export default function Raulopoly() {
               {Object.entries(squareInfo).map(([key, info]) => (
                 <div key={key} style={{ background: '#0a2030', border: '1px solid #1a3a4a', borderRadius: 4, padding: 8 }}>
                   <div style={{ color: '#44ff88', fontWeight: 700, marginBottom: 4 }}>{info.name}</div>
-                  <div style={{ color: '#8899aa', fontSize: 9, lineHeight: 1.3 }}>{info.desc}</div>
+                  <div style={{ color: '#a8b8cc', fontSize: 10, lineHeight: 1.35 }}>{info.desc}</div>
                 </div>
               ))}
             </div>
@@ -1749,7 +1797,70 @@ export default function Raulopoly() {
           style={{ ...btnStyle('#333', true), marginTop: 8, width: '100%' }}>
           {t('exit')}
         </button>
+        <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 11 }} aria-label="Cambiar idioma a español" title="Cambiar idioma a español">ES</button>
+        <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 11 }} aria-label="Switch language to English" title="Switch language to English">EN</button>
       </div>
+            <Board
+        boardSize={BOARD_SIZE}
+        cellSize={CELL_SIZE}
+        squares={SQUARE_DATA}
+        players={players}
+        propOwners={propOwners}
+        propHouses={propHouses}
+        groupColors={GROUP_COLORS}
+        playerConfigs={PLAYER_CONFIGS}
+        centerPanel={(
+          <CenterPanel
+            cellSize={CELL_SIZE}
+            players={players}
+            currentIdx={currentIdx}
+            doubleRentTurns={doubleRentTurns}
+            jackpot={jackpot}
+            dice={dice}
+            animDice={animDice}
+            chaosDie={chaosDie}
+            phase={phase}
+            turnTimer={turnTimer}
+            btnStyle={btnStyle}
+            doRoll={doRoll}
+            t={t}
+            addLog={addLog}
+            setPlayers={setPlayers}
+            doEndTurn={doEndTurn}
+            pendingBuy={pendingBuy}
+            squares={SQUARE_DATA}
+            buyProperty={buyProperty}
+            skipBuy={skipBuy}
+            pendingRent={pendingRent}
+            payRent={payRent}
+            activeCard={activeCard}
+            applyCardEffect={applyCardEffect}
+            propOwners={propOwners}
+            setPropOwners={setPropOwners}
+            setActiveCard={setActiveCard}
+            setPendingGhostSteal={setPendingGhostSteal}
+            setPhase={setPhase}
+            buildOptions={buildOptions}
+            buildHouse={buildHouse}
+            log={log}
+          />
+        )}
+      />
+
+      <PropertySidebar
+        boardSize={BOARD_SIZE}
+        t={t}
+        groupSquares={GROUP_SQUARES}
+        groupColors={GROUP_COLORS}
+        railroads={RAILROADS}
+        utilities={UTILITIES}
+        propOwners={propOwners}
+        propHouses={propHouses}
+        squares={SQUARE_DATA}
+        playerConfigs={PLAYER_CONFIGS}
+        btnStyle={btnStyle}
+        onExit={handleExitGame}
+      />
     </div>
   );
 }

@@ -21,6 +21,8 @@ const getInitialLanguage = () => {
   } catch (_) {
     // Storage can be blocked in some browsers/privacy modes
   }
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored && resources[stored]) return stored;
 
   const browserLang = navigator.language?.split('-')[0];
   return resources[browserLang] ? browserLang : fallbackLng;
@@ -35,6 +37,7 @@ export function I18nProvider({ children }) {
     } catch (_) {
       // noop: storage unavailable
     }
+    localStorage.setItem(STORAGE_KEY, language);
     document.documentElement.lang = language;
   }, [language]);
 
@@ -47,6 +50,7 @@ export function I18nProvider({ children }) {
       }
       return key;
     }
+    if (typeof value !== 'string') return key;
     return interpolate(value, options);
   }, [language]);
 

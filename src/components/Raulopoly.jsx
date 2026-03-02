@@ -165,6 +165,9 @@ function createPlayers(num) {
 
 export default function Raulopoly() {
   const { language, setLanguage, t } = useTranslation();
+  const helpDialogRef = useRef(null);
+  const helpCloseButtonRef = useRef(null);
+  const tutorialCloseButtonRef = useRef(null);
   // pantalla actual: menu, rules, game, winner
   const [screen, setScreen]             = useState('menu');
   const [numPlayers, setNumPlayers]     = useState(2);
@@ -888,6 +891,37 @@ export default function Raulopoly() {
     if (window.confirm(t('exitConfirmation'))) setScreen('menu');
   }, [t]);
 
+  useEffect(() => {
+    if (!showHelp) return;
+
+    helpCloseButtonRef.current?.focus();
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setShowHelp(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showHelp]);
+
+  useEffect(() => {
+    if (!showTutorial) return;
+
+    tutorialCloseButtonRef.current?.focus();
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setTutorialSeen(true);
+        setShowTutorial(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showTutorial]);
+
 
   // ========================= SCREENS =========================
 
@@ -905,6 +939,7 @@ export default function Raulopoly() {
         padding: 20,
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+        <style>{`button:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 2px #44aaff;}`}</style>
         <div style={{
           background: 'linear-gradient(135deg, #0a1525 0%, #1a0525 100%)',
           border: '2px solid #44aaff',
@@ -913,9 +948,9 @@ export default function Raulopoly() {
           maxWidth: 700,
           textAlign: 'center',
           boxShadow: '0 0 40px #44aaff44, inset 0 0 20px #44aaff11',
-        }}>
+        }} role="dialog" aria-modal="true" aria-labelledby="tutorial-dialog-title">
           <div style={{ fontSize: 48, fontWeight: 900, marginBottom: 20 }}>🔍</div>
-          <div style={{ fontSize: 32, fontWeight: 900, color: '#44aaff', marginBottom: 12, letterSpacing: 2 }}>
+          <div id="tutorial-dialog-title" style={{ fontSize: 32, fontWeight: 900, color: '#44aaff', marginBottom: 12, letterSpacing: 2 }}>
             {t('tutorialIntro')}
           </div>
           <div style={{ fontSize: 14, color: '#8899aa', marginBottom: 30, lineHeight: 1.6 }}>
@@ -947,7 +982,7 @@ export default function Raulopoly() {
               setTutorialSeen(true);
               setShowTutorial(false);
               setScreen('rules');
-            }} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '10px 30px', width: 'auto' }}>
+            }} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '10px 30px', width: 'auto' }} ref={tutorialCloseButtonRef}>
               {t('startGame')}
             </button>
             <button onClick={() => {
@@ -973,6 +1008,7 @@ export default function Raulopoly() {
         fontFamily: '"Orbitron", sans-serif',
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+        <style>{`button:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 2px #44aaff;}`}</style>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 80 }}>{winner?.emoji}</div>
           <div style={{
@@ -1005,9 +1041,10 @@ export default function Raulopoly() {
         gap: 30,
       }}>
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+        <style>{`button:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 2px #44aaff;}`}</style>
         <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 10 }}>
-          <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 12 }}>ES</button>
-          <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 12 }}>EN</button>
+          <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 12 }} aria-label="Cambiar idioma a español" title="Cambiar idioma a español">ES</button>
+          <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 12 }} aria-label="Switch language to English" title="Switch language to English">EN</button>
         </div>
         <div style={{
           fontSize: 56, fontWeight: 900,
@@ -1226,6 +1263,7 @@ export default function Raulopoly() {
       boxSizing: 'border-box',
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+      <style>{`button:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 2px #44aaff;}`}</style>
       {/* Help Modal */}
       {showHelp && (
         <div style={{
@@ -1247,17 +1285,17 @@ export default function Raulopoly() {
             overflowY: 'auto',
             fontFamily: '"Orbitron", sans-serif',
             color: '#fff',
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: '#44aaff' }}>{t('helpTitle')}</div>
+          }} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="help-dialog-title" ref={helpDialogRef}>
+            <div id="help-dialog-title" style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: '#44aaff' }}>{t('helpTitle')}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 11 }}>
               {Object.entries(squareInfo).map(([key, info]) => (
                 <div key={key} style={{ background: '#0a2030', border: '1px solid #1a3a4a', borderRadius: 4, padding: 8 }}>
                   <div style={{ color: '#44ff88', fontWeight: 700, marginBottom: 4 }}>{info.name}</div>
-                  <div style={{ color: '#8899aa', fontSize: 9, lineHeight: 1.3 }}>{info.desc}</div>
+                  <div style={{ color: '#a8b8cc', fontSize: 10, lineHeight: 1.35 }}>{info.desc}</div>
                 </div>
               ))}
             </div>
-            <button onClick={() => setShowHelp(false)} style={{ ...btnStyle('#44aaff'), marginTop: 12, width: '100%' }}>
+            <button onClick={() => setShowHelp(false)} style={{ ...btnStyle('#44aaff'), marginTop: 12, width: '100%' }} ref={helpCloseButtonRef}>
               {t('close')}
             </button>
           </div>
@@ -1265,11 +1303,11 @@ export default function Raulopoly() {
       )}
       {/* Top-right controls */}
       <div style={{ position: 'fixed', top: 10, right: 10, display: 'flex', gap: 8, zIndex: 100 }}>
-        <button onClick={() => setShowHelp(!showHelp)} style={{ ...btnStyle('#ffaa00'), fontSize: 14 }}>
+        <button onClick={() => setShowHelp(!showHelp)} style={{ ...btnStyle('#ffaa00'), fontSize: 14 }} aria-label="Abrir ayuda" title="Abrir ayuda">
           {t('help')}
         </button>
-        <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 11 }}>ES</button>
-        <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 11 }}>EN</button>
+        <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 11 }} aria-label="Cambiar idioma a español" title="Cambiar idioma a español">ES</button>
+        <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 11 }} aria-label="Switch language to English" title="Switch language to English">EN</button>
       </div>
       <Board
         boardSize={BOARD_SIZE}

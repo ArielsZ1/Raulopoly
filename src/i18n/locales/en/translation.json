@@ -31,7 +31,10 @@
   "otherProperties": "OTHERS",
   "exit": "🚪 Exit",
   "exitConfirmation": "Leave the match?",
-  "unknownSquare": { "name": "Unknown", "desc": "Unknown square" },
+  "unknownSquare": {
+    "name": "Unknown",
+    "desc": "Unknown square"
+  },
   "rulesText": [
     "Each player starts with $1500.",
     "The board has 40 squares: properties, stations, utilities, taxes, and chaos/power cards.",
@@ -44,23 +47,248 @@
     "The last player with money remaining wins the game."
   ],
   "features": [
-    { "title": "🎲 Chaos Die", "desc": "30% wild effects each turn" },
-    { "title": "👻 Ghost Mode", "desc": "Bankrupt players become vengeful specters" },
-    { "title": "🎰 Galactic Jackpot", "desc": "Free parking accumulates REAL money" },
-    { "title": "☄️ Meteorites", "desc": "Houses can be destroyed anytime" },
-    { "title": "🔀 Teleporters", "desc": "The board moves you where you don't want" },
-    { "title": "🦹 Quantum Theft", "desc": "You can steal money and properties from others" }
+    {
+      "title": "🎲 Chaos Die",
+      "desc": "30% wild effects each turn"
+    },
+    {
+      "title": "👻 Ghost Mode",
+      "desc": "Bankrupt players become vengeful specters"
+    },
+    {
+      "title": "🎰 Galactic Jackpot",
+      "desc": "Free parking accumulates REAL money"
+    },
+    {
+      "title": "☄️ Meteorites",
+      "desc": "Houses can be destroyed anytime"
+    },
+    {
+      "title": "🔀 Teleporters",
+      "desc": "The board moves you where you don't want"
+    },
+    {
+      "title": "🦹 Quantum Theft",
+      "desc": "You can steal money and properties from others"
+    }
   ],
   "squareInfo": {
-    "go": { "name": "GO", "desc": "Collect $200 when you pass. The start of your galactic journey." },
-    "property": { "name": "PROPERTY", "desc": "Buy to corner a color or pay rent. With monopoly, rent doubles." },
-    "railroad": { "name": "STATION", "desc": "Space transport. Rent doubles with each extra station." },
-    "utility": { "name": "UTILITY", "desc": "Cosmic resources. Rent = (dice × 4) or (dice × 10) if you own both." },
-    "tax": { "name": "TAX", "desc": "You pay the bank. Your money goes to the Galactic Jackpot." },
-    "jail": { "name": "JAIL/VISIT", "desc": "Mandatory 3-turn stay. Or pay $50 to leave, or roll doubles." },
-    "freeparking": { "name": "JACKPOT", "desc": "Fortune! Collect ALL accumulated wealth from taxes and chaos squares." },
-    "chance": { "name": "POWER OF CHAOS", "desc": "Random beneficial effect: movement, money, or magical cards." },
-    "chest": { "name": "CHAOS BOX", "desc": "Extreme random effect: can bankrupt or save you. Chaos reigns!" },
-    "gotojail": { "name": "TELEPORTER", "desc": "Sends you straight to JAIL without collecting $200." }
+    "go": {
+      "name": "GO",
+      "desc": "Collect $200 when you pass. The start of your galactic journey."
+    },
+    "property": {
+      "name": "PROPERTY",
+      "desc": "Buy to corner a color or pay rent. With monopoly, rent doubles."
+    },
+    "railroad": {
+      "name": "STATION",
+      "desc": "Space transport. Rent doubles with each extra station."
+    },
+    "utility": {
+      "name": "UTILITY",
+      "desc": "Cosmic resources. Rent = (dice × 4) or (dice × 10) if you own both."
+    },
+    "tax": {
+      "name": "TAX",
+      "desc": "You pay the bank. Your money goes to the Galactic Jackpot."
+    },
+    "jail": {
+      "name": "JAIL/VISIT",
+      "desc": "Mandatory 3-turn stay. Or pay $50 to leave, or roll doubles."
+    },
+    "freeparking": {
+      "name": "JACKPOT",
+      "desc": "Fortune! Collect ALL accumulated wealth from taxes and chaos squares."
+    },
+    "chance": {
+      "name": "POWER OF CHAOS",
+      "desc": "Random beneficial effect: movement, money, or magical cards."
+    },
+    "chest": {
+      "name": "CHAOS BOX",
+      "desc": "Extreme random effect: can bankrupt or save you. Chaos reigns!"
+    },
+    "gotojail": {
+      "name": "TELEPORTER",
+      "desc": "Sends you straight to JAIL without collecting $200."
+    }
+  },
+  "events": {
+    "gameStarted": "RAULOPOLY HAS STARTED! 🚀 Let chaos be with you!",
+    "transferToBank": "{{player}} pays ${{amount}}",
+    "bankruptGhost": "💀 {{player}} is BANKRUPT and becomes a VENGEFUL GHOST! 👻",
+    "landedOnSquare": "{{emoji}} {{player}} lands on: {{square}}",
+    "passGoCollect": "🚀 {{player}} passes GO! Collects ${{amount}}",
+    "teleportToJail": "🌀 TELEPORT TO JAIL! {{player}} vanishes from existence for a moment...",
+    "jackpotCollect": "🎰 {{player}} lands on GALACTIC JACKPOT! Collects ${{amount}}!",
+    "payTaxToJackpot": "💸 {{player}} pays ${{amount}} in taxes to the Galactic Jackpot.",
+    "cannotBuy": "😢 {{player}} can't buy {{square}} (insufficient galactic funds).",
+    "ownProperty": "🏠 {{player}} landed on their own property. At least someone visited!",
+    "shieldUsed": "🛡️ {{player}} uses their DIMENSIONAL SHIELD! Rent avoided.",
+    "mutationActive": "🧬 MUTATION ACTIVE! Dice multiplied x3!",
+    "jailEscapeDoubles": "🎲 DOUBLES! {{player}} escapes jail.",
+    "payJailFine": "⛓️ {{player}} pays ${{amount}} to leave jail.",
+    "stayInJail": "⛓️ {{player}} remains in jail. (Turn {{turn}}/3)",
+    "cursedDieBackwards": "⏮️ CURSED DIE! {{player}} moves back {{steps}} squares.",
+    "rollResult": "🎲 {{player}} rolls {{d1}}+{{d2}}={{total}}{{backward}}{{chaos}}",
+    "reverseTag": " (REVERSE!)",
+    "chaosTag": " + Chaos Die: {{chaosVal}} 😱",
+    "chaosDieLose150": "💣 Chaos Die [1]! {{player}} loses extra ${{amount}}.",
+    "chaosDieGain100": "🎁 Chaos Die [2]! {{player}} receives ${{amount}} from the galactic bank.",
+    "chaosDieSwap": "🔀 Chaos Die [3]! {{player}} SWAPS POSITION with {{target}}!",
+    "chaosDieAdvance6": "⏩ Chaos Die [4]! {{player}} advances {{steps}} extra squares.",
+    "chaosDieShield": "😇 Chaos Die [5]! {{player}} is IMMUNE to next rent.",
+    "chaosDieStorm": "🌪️ Chaos Die [6]! TOTAL STORM! Everyone loses ${{amount}}.",
+    "cardAdvanceGo": "🚀 {{player}} advances to GO and collects ${{amount}}.",
+    "cardGoNorthStation": "🛸 {{player}} flies to North Station.",
+    "cardNextBackward": "🔄 {{player}} will get the CURSED DIE next turn.",
+    "cardGoJail": "⛓️ {{player}} goes directly to JAIL.",
+    "cardCollect150Each": "💰 {{player}} collects ${{amount}} from each player. Total: ${{total}}",
+    "cardPay200": "💸 {{player}} pays ${{amount}} to the bank for \"fiscal quake\".",
+    "cardOutOfJail": "🗝️ {{player}} gets a \"Get Out of Jail Free\" card.",
+    "cardGain100": "🎁 {{player}} gets a ${{amount}} bonus.",
+    "cardBack3": "⏮️ {{player}} moves back {{steps}} squares.",
+    "cardNearestProperty": "🧲 {{player}} moves to {{square}} (nearest unowned property).",
+    "chaosCardAllLoseHalf": "🌪️ GALACTIC STORM! Everyone loses half their money.",
+    "chaosCardSwapRichest": "🔀 {{player}} swaps position with {{target}} (the richest).",
+    "chaosCardDestroyHouses": "☄️ METEORITE! All houses in group {{group}} are DESTROYED.",
+    "chaosCardGain500": "🤑 {{player}} receives ${{amount}} from Mutant Lottery.",
+    "chaosCardLeftLose300": "😈 {{player}} loses ${{amount}} due to viral curse.",
+    "chaosCardGoMostExpensive": "🕳️ {{player}} is pulled to {{square}}!",
+    "chaosCardDoubleRent": "🔥 REVOLUTION! All rents are DOUBLED for {{turns}} turns.",
+    "chaosCardSteal200Each": "🦹 {{player}} steals ${{amount}} from each player. Total: ${{total}}",
+    "chaosCardNextDiceX3": "🧬 {{player}} activated GENETIC MUTATION. Next dice x3!",
+    "chaosCardRandomTeleport": "🌀 {{player}} is teleported to {{square}}.",
+    "chaosCardCollect100Each": "✨ {{player}} collects ${{amount}} from each player via galactic charisma.",
+    "chaosCardPayPerProp": "💸 {{player}} pays ${{charge}} ({{ownedCount}} properties × $50 karmic tax).",
+    "chaosCardNextTurnFree": "🛡️ {{player}} activates DIMENSIONAL SHIELD. Next rent: free.",
+    "chaosCardBankCharge400": "🏦 {{player}} pays ${{amount}} in \"dimensional bailout fees\".",
+    "chaosCardBackToStart": "👻 {{player}} goes back to start via time loop. No $200 collected.",
+    "chaosCardJackpotBonus": "🎰 BONUS! Galactic Jackpot DOUBLES to ${{amount}}!",
+    "buyProperty": "🏠 {{player}} buys {{square}} for ${{price}}!",
+    "skipBuy": "😒 {{player}} skips buying. A lost galactic opportunity.",
+    "payRent": "💸 {{player}} pays ${{rent}} rent to {{owner}} for {{square}}.",
+    "buildHouse": "🏗️ {{player}} builds a {{houseType}} on {{square}}.",
+    "fortress": "FORTRESS",
+    "house": "house",
+    "ghostHaunt": "👻 {{ghost}} HAUNTS {{target}}! They lose extra ${{amount}} next turn.",
+    "ghostStealProperty": "🫀 {{player}} STEALS {{square}} from {{target}}!",
+    "payRentPrompt": "You must pay ${{rent}} to {{owner}}.",
+    "jailShieldNoUse": "(You have a jail shield, it doesn't apply here 😅)",
+    "payRentButton": "PAY RENT",
+    "ghostStealPrompt": "Choose which player to STEAL a property from:"
+  },
+  "powerCards": {
+    "goToGo": {
+      "title": "POWER OF CHAOS",
+      "text": "Advance to GO. Collect $200."
+    },
+    "goTo5": {
+      "title": "POWER OF CHAOS",
+      "text": "Advance to North Orbital Station."
+    },
+    "nextBackward": {
+      "title": "POWER OF CHAOS",
+      "text": "CURSED DIE! Your next move is in REVERSE."
+    },
+    "goToJail": {
+      "title": "POWER OF CHAOS",
+      "text": "Go directly to JAIL. Do not collect $200."
+    },
+    "collect150": {
+      "title": "POWER OF CHAOS",
+      "text": "Collect $150 from all players (\"emergency consulting\")."
+    },
+    "pay200": {
+      "title": "POWER OF CHAOS",
+      "text": "FISCAL QUAKE! Pay $200 to the bank."
+    },
+    "outOfJail": {
+      "title": "POWER OF CHAOS",
+      "text": "Get out of jail for free. (Keep this card.)"
+    },
+    "gain100": {
+      "title": "POWER OF CHAOS",
+      "text": "Cosmic productivity bonus! Collect $100."
+    },
+    "back3": {
+      "title": "POWER OF CHAOS",
+      "text": "Move back 3 squares."
+    },
+    "nearest": {
+      "title": "POWER OF CHAOS",
+      "text": "Move to the nearest UNOWNED property."
+    }
+  },
+  "chaosCards": {
+    "allLoseHalf": {
+      "title": "GALACTIC STORM!",
+      "text": "ALL players lose HALF of their money. Not even the bank is safe."
+    },
+    "swapWithRichest": {
+      "title": "QUANTUM INVERSION!",
+      "text": "Swap BOARD POSITION with the richest player."
+    },
+    "destroyHouses": {
+      "title": "METEOR STRIKE!",
+      "text": "A meteor destroys ALL houses in a random color group."
+    },
+    "gain500": {
+      "title": "MUTANT LOTTERY!",
+      "text": "The bank gives you $500! (Suspiciously unexplained.)"
+    },
+    "leftLose300": {
+      "title": "VIRAL CURSE!",
+      "text": "The player to your LEFT loses $300 due to \"karmic contamination\"."
+    },
+    "goMostExpensive": {
+      "title": "BLACK HOLE!",
+      "text": "You are pulled to the MOST EXPENSIVE PROPERTY on the board."
+    },
+    "doubleRent": {
+      "title": "PROLETARIAN REVOLUTION!",
+      "text": "ALL rents DOUBLE for the next 2 turns."
+    },
+    "steal200each": {
+      "title": "QUANTUM THEFT!",
+      "text": "Steal $200 from EACH player."
+    },
+    "nextDiceX3": {
+      "title": "GENETIC MUTATION!",
+      "text": "Your NEXT die is multiplied by 3."
+    },
+    "randomTeleport": {
+      "title": "FORCED TELEPORT!",
+      "text": "You are sent to a COMPLETELY RANDOM square."
+    },
+    "collect100each": {
+      "title": "GALACTIC CHARISMA!",
+      "text": "Collect $100 from EACH player thanks to your magnetic aura."
+    },
+    "payPerProp": {
+      "title": "KARMIC TAX!",
+      "text": "Pay $50 for EACH PROPERTY you own."
+    },
+    "nextTurnFree": {
+      "title": "DIMENSIONAL SHIELD!",
+      "text": "You are IMMUNE to rents on your next turn."
+    },
+    "bankCharge400": {
+      "title": "ECONOMIC CRISIS!",
+      "text": "The bank charges you $400 in \"dimensional bailout fees\"."
+    },
+    "backToStart": {
+      "title": "TIME LOOP!",
+      "text": "Go back to START without collecting $200."
+    },
+    "ghostSteal": {
+      "title": "SPIRIT POSSESSION!",
+      "text": "Steal ONE random property from any player."
+    },
+    "jackpotBonus": {
+      "title": "JACKPOT BONUS!",
+      "text": "The Galactic Jackpot DOUBLES instantly."
+    }
   }
 }

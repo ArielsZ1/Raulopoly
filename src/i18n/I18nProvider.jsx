@@ -1,17 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import es from './locales/es/translation.json';
 import en from './locales/en/translation.json';
-import { getLanguage, setLanguage as setStoredLanguage } from '../services/storageService';
 
+const STORAGE_KEY = 'raulopolyLanguage';
 const resources = { es, en };
 const fallbackLng = 'es';
 
 const I18nContext = createContext(null);
 
 const getByPath = (obj, path) => path.split('.').reduce((acc, key) => acc?.[key], obj);
+const interpolate = (template, options) => template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => {
+  const value = options[key];
+  return value === undefined || value === null ? '' : String(value);
+});
 
 const getInitialLanguage = () => {
-  const stored = getLanguage();
+  const stored = localStorage.getItem(STORAGE_KEY);
   if (stored && resources[stored]) return stored;
 
   const browserLang = navigator.language?.split('-')[0];
@@ -22,14 +26,15 @@ export function I18nProvider({ children }) {
   const [language, setLanguage] = useState(getInitialLanguage);
 
   useEffect(() => {
-    setStoredLanguage(language);
+    localStorage.setItem(STORAGE_KEY, language);
     document.documentElement.lang = language;
   }, [language]);
 
   const t = useCallback((key, options = {}) => {
     const value = getByPath(resources[language], key) ?? getByPath(resources[fallbackLng], key);
     if (options.returnObjects) return value;
-    return typeof value === 'string' ? value : key;
+    if (typeof value !== 'string') return key;
+    return interpolate(value, options);
   }, [language]);
 
   const value = useMemo(() => ({ language, setLanguage, t }), [language, t]);

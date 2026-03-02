@@ -31,7 +31,10 @@
   "otherProperties": "OTRAS",
   "exit": "🚪 Salir",
   "exitConfirmation": "¿Abandonar la partida?",
-  "unknownSquare": { "name": "Desconocida", "desc": "Casilla desconocida" },
+  "unknownSquare": {
+    "name": "Desconocida",
+    "desc": "Casilla desconocida"
+  },
   "rulesText": [
     "Cada jugador comienza con $1500.",
     "El tablero tiene 40 casillas: propiedades, estaciones, servicios, impuestos y cartas de caos/poder.",
@@ -44,23 +47,248 @@
     "La primera persona con dinero al final elimina a los demás y gana el juego."
   ],
   "features": [
-    { "title": "🎲 Dado del Caos", "desc": "30% de efectos salvajes en cada turno" },
-    { "title": "👻 Modo Fantasma", "desc": "Los arruinados se convierten en espectros vengativos" },
-    { "title": "🎰 Jackpot Galáctico", "desc": "El parking libre acumula dinero REAL" },
-    { "title": "☄️ Meteoritos", "desc": "Las casas pueden ser destruidas en cualquier momento" },
-    { "title": "🔀 Teletransportadores", "desc": "El tablero te mueve a donde no quieres" },
-    { "title": "🦹 Robo Cuántico", "desc": "Puedes robar dinero y propiedades a otros" }
+    {
+      "title": "🎲 Dado del Caos",
+      "desc": "30% de efectos salvajes en cada turno"
+    },
+    {
+      "title": "👻 Modo Fantasma",
+      "desc": "Los arruinados se convierten en espectros vengativos"
+    },
+    {
+      "title": "🎰 Jackpot Galáctico",
+      "desc": "El parking libre acumula dinero REAL"
+    },
+    {
+      "title": "☄️ Meteoritos",
+      "desc": "Las casas pueden ser destruidas en cualquier momento"
+    },
+    {
+      "title": "🔀 Teletransportadores",
+      "desc": "El tablero te mueve a donde no quieres"
+    },
+    {
+      "title": "🦹 Robo Cuántico",
+      "desc": "Puedes robar dinero y propiedades a otros"
+    }
   ],
   "squareInfo": {
-    "go": { "name": "SALIDA", "desc": "Cobra $200 al pasar. El inicio del viaje galáctico." },
-    "property": { "name": "PROPIEDAD", "desc": "Compra para dominar un color, o paga alquiler. Con monopolio, el alquiler se duplica." },
-    "railroad": { "name": "ESTACIÓN", "desc": "Transporte espacial. El alquiler se duplica con cada estación extra." },
-    "utility": { "name": "SERVICIO", "desc": "Recursos cósmicos. Alquiler = (dados × 4) o (dados × 10) si tienes ambos." },
-    "tax": { "name": "IMPUESTO", "desc": "Pagas al banco. Tu dinero va al Jackpot Galáctico." },
-    "jail": { "name": "CÁRCEL/VISITA", "desc": "Estancia obligatoria 3 turnos. O paga $50 para salir, o saca dobles." },
-    "freeparking": { "name": "JACKPOT", "desc": "¡Fortuna! Cobra TODO lo acumulado en impuestos y casillas de caos." },
-    "chance": { "name": "PODER DEL CAOS", "desc": "Efecto aleatorio benéfico: movimiento, dinero, o cartas mágicas." },
-    "chest": { "name": "CAJA DEL CAOS", "desc": "Efecto aleatorio EXTREMO: puede arruinarte o salvarte. ¡El caos reina!" },
-    "gotojail": { "name": "TELETRANSPORTADOR", "desc": "Te envía directo a la CÁRCEL. Sin cobrar $200. Atajo oscuro." }
+    "go": {
+      "name": "SALIDA",
+      "desc": "Cobra $200 al pasar. El inicio del viaje galáctico."
+    },
+    "property": {
+      "name": "PROPIEDAD",
+      "desc": "Compra para dominar un color, o paga alquiler. Con monopolio, el alquiler se duplica."
+    },
+    "railroad": {
+      "name": "ESTACIÓN",
+      "desc": "Transporte espacial. El alquiler se duplica con cada estación extra."
+    },
+    "utility": {
+      "name": "SERVICIO",
+      "desc": "Recursos cósmicos. Alquiler = (dados × 4) o (dados × 10) si tienes ambos."
+    },
+    "tax": {
+      "name": "IMPUESTO",
+      "desc": "Pagas al banco. Tu dinero va al Jackpot Galáctico."
+    },
+    "jail": {
+      "name": "CÁRCEL/VISITA",
+      "desc": "Estancia obligatoria 3 turnos. O paga $50 para salir, o saca dobles."
+    },
+    "freeparking": {
+      "name": "JACKPOT",
+      "desc": "¡Fortuna! Cobra TODO lo acumulado en impuestos y casillas de caos."
+    },
+    "chance": {
+      "name": "PODER DEL CAOS",
+      "desc": "Efecto aleatorio benéfico: movimiento, dinero, o cartas mágicas."
+    },
+    "chest": {
+      "name": "CAJA DEL CAOS",
+      "desc": "Efecto aleatorio EXTREMO: puede arruinarte o salvarte. ¡El caos reina!"
+    },
+    "gotojail": {
+      "name": "TELETRANSPORTADOR",
+      "desc": "Te envía directo a la CÁRCEL. Sin cobrar $200. Atajo oscuro."
+    }
+  },
+  "events": {
+    "gameStarted": "¡RAULOPOLY HA COMENZADO! 🚀 ¡Que el caos os acompañe!",
+    "transferToBank": "{{player}} paga ${{amount}}",
+    "bankruptGhost": "💀 {{player}} está en BANCARROTA y se convierte en ¡FANTASMA VENGADOR! 👻",
+    "landedOnSquare": "{{emoji}} {{player}} cae en: {{square}}",
+    "passGoCollect": "🚀 ¡{{player}} pasa por la SALIDA! Cobra ${{amount}}",
+    "teleportToJail": "🌀 ¡TELETRANSPORTE a la CÁRCEL! {{player}} desaparece de la existencia momentáneamente...",
+    "jackpotCollect": "🎰 ¡{{player}} cae en el JACKPOT GALÁCTICO! Cobra ${{amount}}!",
+    "payTaxToJackpot": "💸 {{player}} paga ${{amount}} de impuestos al Jackpot Galáctico.",
+    "cannotBuy": "😢 {{player}} no puede comprar {{square}} (le faltan fondos galácticos).",
+    "ownProperty": "🏠 {{player}} está en su propia propiedad. ¡Al menos alguien lo visita!",
+    "shieldUsed": "🛡️ ¡{{player}} usa su ESCUDO DIMENSIONAL! Alquiler evitado.",
+    "mutationActive": "🧬 ¡MUTACIÓN ACTIVA! Dados multiplicados x3!",
+    "jailEscapeDoubles": "🎲 ¡DOBLES! {{player}} escapa de la cárcel.",
+    "payJailFine": "⛓️ {{player}} paga ${{amount}} para salir de la cárcel.",
+    "stayInJail": "⛓️ {{player}} sigue en la cárcel. (Turno {{turn}}/3)",
+    "cursedDieBackwards": "⏮️ ¡DADO MALDITO! {{player}} retrocede {{steps}} casillas.",
+    "rollResult": "🎲 {{player}} saca {{d1}}+{{d2}}={{total}}{{backward}}{{chaos}}",
+    "reverseTag": " (¡REVERSA!)",
+    "chaosTag": " + Dado del Caos: {{chaosVal}} 😱",
+    "chaosDieLose150": "💣 ¡Dado del Caos [1]! {{player}} pierde ${{amount}} adicionales.",
+    "chaosDieGain100": "🎁 ¡Dado del Caos [2]! {{player}} recibe ${{amount}} del banco galáctico.",
+    "chaosDieSwap": "🔀 ¡Dado del Caos [3]! {{player}} INTERCAMBIA POSICIÓN con {{target}}!",
+    "chaosDieAdvance6": "⏩ ¡Dado del Caos [4]! {{player}} avanza {{steps}} casillas extra.",
+    "chaosDieShield": "😇 ¡Dado del Caos [5]! {{player}} es INMUNE al próximo alquiler.",
+    "chaosDieStorm": "🌪️ ¡Dado del Caos [6]! ¡TORMENTA TOTAL! Todos pierden ${{amount}}.",
+    "cardAdvanceGo": "🚀 {{player}} avanza a la SALIDA y cobra ${{amount}}.",
+    "cardGoNorthStation": "🛸 {{player}} vuela a la Estación Norte.",
+    "cardNextBackward": "🔄 {{player}} recibirá el DADO MALDITO en su próximo turno.",
+    "cardGoJail": "⛓️ {{player}} va directamente a la CÁRCEL.",
+    "cardCollect150Each": "💰 {{player}} cobra ${{amount}} de cada jugador. Total: ${{total}}",
+    "cardPay200": "💸 {{player}} paga ${{amount}} al banco por \"terremoto fiscal\".",
+    "cardOutOfJail": "🗝️ {{player}} obtiene una carta \"Salida Libre de la Cárcel\".",
+    "cardGain100": "🎁 {{player}} cobra ${{amount}} de bonus.",
+    "cardBack3": "⏮️ {{player}} retrocede {{steps}} casillas.",
+    "cardNearestProperty": "🧲 {{player}} avanza a {{square}} (primera propiedad libre).",
+    "chaosCardAllLoseHalf": "🌪️ ¡TORMENTA GALÁCTICA! Todos pierden la mitad de su dinero.",
+    "chaosCardSwapRichest": "🔀 {{player}} intercambia posición con {{target}} (el más rico).",
+    "chaosCardDestroyHouses": "☄️ ¡METEORITO! Todas las casas del grupo {{group}} son DESTRUIDAS.",
+    "chaosCardGain500": "🤑 {{player}} recibe ${{amount}} de la Lotería Mutante.",
+    "chaosCardLeftLose300": "😈 {{player}} pierde ${{amount}} por maldición viral.",
+    "chaosCardGoMostExpensive": "🕳️ {{player}} es succionado hasta {{square}}!",
+    "chaosCardDoubleRent": "🔥 ¡REVOLUCIÓN! Todos los alquileres se DUPLICAN por {{turns}} turnos.",
+    "chaosCardSteal200Each": "🦹 {{player}} roba ${{amount}} de cada jugador. Total: ${{total}}",
+    "chaosCardNextDiceX3": "🧬 {{player}} activó MUTACIÓN GENÉTICA. Próximos dados x3!",
+    "chaosCardRandomTeleport": "🌀 {{player}} es teletransportado a {{square}}.",
+    "chaosCardCollect100Each": "✨ {{player}} cobra ${{amount}} de cada jugador por carisma galáctico.",
+    "chaosCardPayPerProp": "💸 {{player}} paga ${{charge}} ({{ownedCount}} propiedades × $50 impuesto kármico).",
+    "chaosCardNextTurnFree": "🛡️ {{player}} activa ESCUDO DIMENSIONAL. Próximo alquiler: gratis.",
+    "chaosCardBankCharge400": "🏦 {{player}} paga ${{amount}} por \"cuotas de rescate dimensional\".",
+    "chaosCardBackToStart": "👻 {{player}} retrocede al inicio por bucle temporal. Sin cobrar $200.",
+    "chaosCardJackpotBonus": "🎰 ¡BONUS! El Jackpot Galáctico se DUPLICA a ${{amount}}!",
+    "buyProperty": "🏠 {{player}} compra {{square}} por ${{price}}!",
+    "skipBuy": "😒 {{player}} pasa de comprar. Una oportunidad galáctica perdida.",
+    "payRent": "💸 {{player}} paga ${{rent}} de alquiler a {{owner}} por {{square}}.",
+    "buildHouse": "🏗️ {{player}} construye una {{houseType}} en {{square}}.",
+    "fortress": "FORTALEZA",
+    "house": "casa",
+    "ghostHaunt": "👻 {{ghost}} PERSIGUE a {{target}}! Pierde ${{amount}} extra en su próximo turno.",
+    "ghostStealProperty": "🫀 {{player}} ROBA {{square}} de {{target}}!",
+    "payRentPrompt": "Debes pagar ${{rent}} a {{owner}}.",
+    "jailShieldNoUse": "(Tienes escudo de cárcel, no sirve aquí 😅)",
+    "payRentButton": "PAGAR ALQUILER",
+    "ghostStealPrompt": "Elige a qué jugador ROBARLE una propiedad:"
+  },
+  "powerCards": {
+    "goToGo": {
+      "title": "PODER DEL CAOS",
+      "text": "Avanza hasta la SALIDA. Cobra $200."
+    },
+    "goTo5": {
+      "title": "PODER DEL CAOS",
+      "text": "Avanza a la Estación Orbital Norte."
+    },
+    "nextBackward": {
+      "title": "PODER DEL CAOS",
+      "text": "¡DADO MALDITO! Tu próximo movimiento es en REVERSA."
+    },
+    "goToJail": {
+      "title": "PODER DEL CAOS",
+      "text": "Ve directamente a la CÁRCEL. No cobres $200."
+    },
+    "collect150": {
+      "title": "PODER DEL CAOS",
+      "text": "Cobra $150 de todos los jugadores (\"consultoría de emergencia\")."
+    },
+    "pay200": {
+      "title": "PODER DEL CAOS",
+      "text": "¡TERREMOTO FISCAL! Paga $200 al banco."
+    },
+    "outOfJail": {
+      "title": "PODER DEL CAOS",
+      "text": "Sales gratis de la cárcel. (Guarda esta carta.)"
+    },
+    "gain100": {
+      "title": "PODER DEL CAOS",
+      "text": "¡Bonus de productividad cósmica! Cobra $100."
+    },
+    "back3": {
+      "title": "PODER DEL CAOS",
+      "text": "Retrocede 3 casillas."
+    },
+    "nearest": {
+      "title": "PODER DEL CAOS",
+      "text": "Avanza a la propiedad SIN DUEÑO más cercana."
+    }
+  },
+  "chaosCards": {
+    "allLoseHalf": {
+      "title": "¡TORMENTA GALÁCTICA!",
+      "text": "TODOS los jugadores pierden la MITAD de su dinero. Ni el banco se salva."
+    },
+    "swapWithRichest": {
+      "title": "¡INVERSIÓN CUÁNTICA!",
+      "text": "Intercambias POSICIÓN EN EL TABLERO con el jugador más rico. ¡Surpresa!"
+    },
+    "destroyHouses": {
+      "title": "¡METEORITO DESTRUCTOR!",
+      "text": "Un meteorito destruye TODAS las casas de un grupo de color aleatorio."
+    },
+    "gain500": {
+      "title": "¡LOTERÍA MUTANTE!",
+      "text": "¡El banco te entrega $500! (Sospechosamente sin explicación.)"
+    },
+    "leftLose300": {
+      "title": "¡MALDICIÓN VIRAL!",
+      "text": "El jugador a tu IZQUIERDA pierde $300 por \"contaminación kármica\"."
+    },
+    "goMostExpensive": {
+      "title": "¡AGUJERO NEGRO!",
+      "text": "Eres succionado hasta la PROPIEDAD MÁS CARA del tablero. Buena suerte."
+    },
+    "doubleRent": {
+      "title": "¡REVOLUCIÓN PROLETARIA!",
+      "text": "TODOS los alquileres se DUPLICAN durante los próximos 2 turnos."
+    },
+    "steal200each": {
+      "title": "¡ROBO CUÁNTICO!",
+      "text": "Robas $200 de CADA jugador. Solo los fanáticos del caos se alegran."
+    },
+    "nextDiceX3": {
+      "title": "¡MUTACIÓN GENÉTICA!",
+      "text": "Tu PRÓXIMO dado se multiplica por 3. Prepárate para volar."
+    },
+    "randomTeleport": {
+      "title": "¡TELETRANSPORTE FORZADO!",
+      "text": "Eres enviado a una casilla COMPLETAMENTE ALEATORIA del tablero."
+    },
+    "collect100each": {
+      "title": "¡CARISMA GALÁCTICO!",
+      "text": "Cobras $100 de CADA jugador gracias a tu aura magnética."
+    },
+    "payPerProp": {
+      "title": "¡IMPUESTO KÁRMICO!",
+      "text": "Pagas $50 por CADA PROPIEDAD que posees. El karma es un boomerang."
+    },
+    "nextTurnFree": {
+      "title": "¡ESCUDO DIMENSIONAL!",
+      "text": "Tu próximo turno eres INMUNE a alquileres. Disfruta mientras dura."
+    },
+    "bankCharge400": {
+      "title": "¡CRISIS ECONÓMICA!",
+      "text": "El banco te cobra $400 en \"cuotas de rescate dimensional\". Lo sentimos."
+    },
+    "backToStart": {
+      "title": "¡BUCLE TEMPORAL!",
+      "text": "Retrocedes hasta la SALIDA sin cobrar $200. El tiempo se ha roto."
+    },
+    "ghostSteal": {
+      "title": "¡POSESIÓN ESPIRITUAL!",
+      "text": "Robas UNA PROPIEDAD aleatoria de cualquier jugador. (Elige tú a cuál.)"
+    },
+    "jackpotBonus": {
+      "title": "¡BONUS DEL JACKPOT!",
+      "text": "El Jackpot Galáctico se DUPLICA instantáneamente. El caos es generoso."
+    }
   }
 }

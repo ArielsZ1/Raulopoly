@@ -1,10 +1,5 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "../i18n/I18nProvider";
-import { clearSavedGame, getSavedGame, getTutorialSeen, setSavedGame, setTutorialSeen } from "../services/storageService";
-import { useTurnTimer } from "../hooks/useTurnTimer";
-import Board from "./game/Board";
-import CenterPanel from "./game/CenterPanel";
-import PropertySidebar from "./game/PropertySidebar";
 
 // ========================= GAME DATA =========================
 
@@ -84,36 +79,36 @@ const PLAYER_CONFIGS = [
 ];
 
 const CHAOS_CARDS = [
-  { id: 'allLoseHalf',     emoji: '🌪️', title: '¡TORMENTA GALÁCTICA!',     text: 'TODOS los jugadores pierden la MITAD de su dinero. Ni el banco se salva.' },
-  { id: 'swapWithRichest', emoji: '🔀', title: '¡INVERSIÓN CUÁNTICA!',      text: 'Intercambias POSICIÓN EN EL TABLERO con el jugador más rico. ¡Surpresa!' },
-  { id: 'destroyHouses',   emoji: '☄️', title: '¡METEORITO DESTRUCTOR!',    text: 'Un meteorito destruye TODAS las casas de un grupo de color aleatorio.' },
-  { id: 'gain500',         emoji: '🤑', title: '¡LOTERÍA MUTANTE!',         text: '¡El banco te entrega $500! (Sospechosamente sin explicación.)' },
-  { id: 'leftLose300',     emoji: '😈', title: '¡MALDICIÓN VIRAL!',         text: 'El jugador a tu IZQUIERDA pierde $300 por "contaminación kármica".' },
-  { id: 'goMostExpensive', emoji: '🕳️', title: '¡AGUJERO NEGRO!',          text: 'Eres succionado hasta la PROPIEDAD MÁS CARA del tablero. Buena suerte.' },
-  { id: 'doubleRent',      emoji: '🔥', title: '¡REVOLUCIÓN PROLETARIA!',   text: 'TODOS los alquileres se DUPLICAN durante los próximos 2 turnos.' },
-  { id: 'steal200each',    emoji: '🦹', title: '¡ROBO CUÁNTICO!',           text: 'Robas $200 de CADA jugador. Solo los fanáticos del caos se alegran.' },
-  { id: 'nextDiceX3',      emoji: '🎲', title: '¡MUTACIÓN GENÉTICA!',       text: 'Tu PRÓXIMO dado se multiplica por 3. Prepárate para volar.' },
-  { id: 'randomTeleport',  emoji: '🌀', title: '¡TELETRANSPORTE FORZADO!',  text: 'Eres enviado a una casilla COMPLETAMENTE ALEATORIA del tablero.' },
-  { id: 'collect100each',  emoji: '✨', title: '¡CARISMA GALÁCTICO!',       text: 'Cobras $100 de CADA jugador gracias a tu aura magnética.' },
-  { id: 'payPerProp',      emoji: '💸', title: '¡IMPUESTO KÁRMICO!',        text: 'Pagas $50 por CADA PROPIEDAD que posees. El karma es un boomerang.' },
-  { id: 'nextTurnFree',    emoji: '🛡️', title: '¡ESCUDO DIMENSIONAL!',     text: 'Tu próximo turno eres INMUNE a alquileres. Disfruta mientras dura.' },
-  { id: 'bankCharge400',   emoji: '🏦', title: '¡CRISIS ECONÓMICA!',        text: 'El banco te cobra $400 en "cuotas de rescate dimensional". Lo sentimos.' },
-  { id: 'backToStart',     emoji: '👻', title: '¡BUCLE TEMPORAL!',          text: 'Retrocedes hasta la SALIDA sin cobrar $200. El tiempo se ha roto.' },
-  { id: 'ghostSteal',      emoji: '🫀', title: '¡POSESIÓN ESPIRITUAL!',     text: 'Robas UNA PROPIEDAD aleatoria de cualquier jugador. (Elige tú a cuál.)' },
-  { id: 'jackpotBonus',    emoji: '🎰', title: '¡BONUS DEL JACKPOT!',       text: 'El Jackpot Galáctico se DUPLICA instantáneamente. El caos es generoso.' },
+  { id: 'allLoseHalf', emoji: '🌪️' },
+  { id: 'swapWithRichest', emoji: '🔀' },
+  { id: 'destroyHouses', emoji: '☄️' },
+  { id: 'gain500', emoji: '🤑' },
+  { id: 'leftLose300', emoji: '😈' },
+  { id: 'goMostExpensive', emoji: '🕳️' },
+  { id: 'doubleRent', emoji: '🔥' },
+  { id: 'steal200each', emoji: '🦹' },
+  { id: 'nextDiceX3', emoji: '🎲' },
+  { id: 'randomTeleport', emoji: '🌀' },
+  { id: 'collect100each', emoji: '✨' },
+  { id: 'payPerProp', emoji: '💸' },
+  { id: 'nextTurnFree', emoji: '🛡️' },
+  { id: 'bankCharge400', emoji: '🏦' },
+  { id: 'backToStart', emoji: '👻' },
+  { id: 'ghostSteal', emoji: '🫀' },
+  { id: 'jackpotBonus', emoji: '🎰' },
 ];
 
 const POWER_CARDS = [
-  { id: 'goToGo',       emoji: '🚀', text: 'Avanza hasta la SALIDA. Cobra $200.' },
-  { id: 'goTo5',        emoji: '🛸', text: 'Avanza a la Estación Orbital Norte.' },
-  { id: 'nextBackward', emoji: '🔄', text: '¡DADO MALDITO! Tu próximo movimiento es en REVERSA.' },
-  { id: 'goToJail',     emoji: '⛓️', text: 'Ve directamente a la CÁRCEL. No cobres $200.' },
-  { id: 'collect150',   emoji: '💰', text: 'Cobra $150 de todos los jugadores ("consultoría de emergencia").' },
-  { id: 'pay200',       emoji: '💸', text: '¡TERREMOTO FISCAL! Paga $200 al banco.' },
-  { id: 'outOfJail',    emoji: '🗝️', text: 'Sales gratis de la cárcel. (Guarda esta carta.)' },
-  { id: 'gain100',      emoji: '🎁', text: '¡Bonus de productividad cósmica! Cobra $100.' },
-  { id: 'back3',        emoji: '⏮️', text: 'Retrocede 3 casillas.' },
-  { id: 'nearest',      emoji: '🧲', text: 'Avanza a la propiedad SIN DUEÑO más cercana.' },
+  { id: 'goToGo', emoji: '🚀' },
+  { id: 'goTo5', emoji: '🛸' },
+  { id: 'nextBackward', emoji: '🔄' },
+  { id: 'goToJail', emoji: '⛓️' },
+  { id: 'collect150', emoji: '💰' },
+  { id: 'pay200', emoji: '💸' },
+  { id: 'outOfJail', emoji: '🗝️' },
+  { id: 'gain100', emoji: '🎁' },
+  { id: 'back3', emoji: '⏮️' },
+  { id: 'nearest', emoji: '🧲' },
 ];
 
 // ========================= HELPERS =========================
@@ -165,9 +160,6 @@ function createPlayers(num) {
 
 export default function Raulopoly() {
   const { language, setLanguage, t } = useTranslation();
-  const helpDialogRef = useRef(null);
-  const helpCloseButtonRef = useRef(null);
-  const tutorialCloseButtonRef = useRef(null);
   // pantalla actual: menu, rules, game, winner
   const [screen, setScreen]             = useState('menu');
   const [numPlayers, setNumPlayers]     = useState(2);
@@ -283,28 +275,43 @@ export default function Raulopoly() {
     }
   }, []);
 
+  const [turnTimer, setTurnTimer] = useState(60);
   const [showHelp, setShowHelp] = useState(false);
   const [showTutorial, setShowTutorial] = useState(() => !getTutorialSeen());
-
-  const { turnTimer, resetTimer } = useTurnTimer({
-    screen,
-    phase,
-    onTimeout: () => {
-      playSound('jail');
-      nextTurn(players, currentIdx);
-    },
-  });
 
   const features = t('features', { returnObjects: true }) || [];
   const squareInfo = t('squareInfo', { returnObjects: true }) || {};
   const rulesText = t('rulesText', { returnObjects: true }) || [];
+  const getCardI18nPrefix = (card) => card?.source === 'chest' ? 'chaosCards' : 'powerCards';
 
   useEffect(() => {
-    resetTimer();
-  }, [currentIdx, resetTimer]);
+    if (screen !== 'game' || phase === 'card' || phase === 'buydecision' || phase === 'payrent' || phase === 'endturn') {
+      return;
+    }
+    const timer = setInterval(() => {
+      setTurnTimer(prev => {
+        if (prev <= 1) {
+          playSound('jail'); // sonido de alerta
+          nextTurn(players, currentIdx);
+          return 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [screen, phase, players, currentIdx, playSound, nextTurn]);
 
-  const addLog = useCallback((msg, type = 'normal') => {
-    setLog(prev => [{ msg, type, id: Date.now() + Math.random() }, ...prev].slice(0, 30));
+  // Resetear timer al cambiar de turno
+  useEffect(() => {
+    setTurnTimer(60);
+  }, [currentIdx]);
+
+  const addLog = useCallback((keyOrMessage, params = {}, type = 'normal') => {
+    if (typeof params === 'string') {
+      setLog(prev => [{ message: keyOrMessage, type: params, id: Date.now() + Math.random() }, ...prev].slice(0, 30));
+      return;
+    }
+    setLog(prev => [{ key: keyOrMessage, params, type, id: Date.now() + Math.random() }, ...prev].slice(0, 30));
   }, []);
 
   function startGame() {
@@ -327,7 +334,7 @@ export default function Raulopoly() {
     setDoubleRentTurns(0);
     setScreen('game');
     playSound('success');
-    addLog('¡RAULOPOLY HA COMENZADO! 🚀 ¡Que el caos os acompañe!', 'event');
+    addLog('events.gameStarted', {}, 'event');
   }
 
   function hasMonopoly(playerIdx, group) {
@@ -368,13 +375,13 @@ export default function Raulopoly() {
       } else if (toIdx >= 0) {
         next[toIdx].money += actual;
       }
-      addLog(reason || `${next[fromIdx].name} paga $${actual}`, 'money');
+      addLog(reason || 'events.transferToBank', reason ? {} : { player: next[fromIdx].name, amount: actual }, 'money');
       // check bankruptcy
       if (next[fromIdx].money <= 0 && !next[fromIdx].isGhost) {
         next[fromIdx].money = 0;
         next[fromIdx].alive = false;
         next[fromIdx].isGhost = true;
-        addLog(`💀 ${next[fromIdx].name} está en BANCARROTA y se convierte en ¡FANTASMA VENGADOR! 👻`, 'event');
+        addLog('events.bankruptGhost', { player: next[fromIdx].name }, 'event');
         // ghost can still haunt players
       }
       return next;
@@ -407,17 +414,17 @@ export default function Raulopoly() {
   function landOnSquare(playerIdx, squareId, diceTotal, newPlayers) {
     const sq = SQUARE_DATA[squareId];
     const player = newPlayers[playerIdx];
-    addLog(`${player.emoji} ${player.name} cae en: ${sq.name}`, 'move');
+    addLog('events.landedOnSquare', { emoji: player.emoji, player: player.name, square: sq.name }, 'move');
 
     if (sq.type === 'go') {
-      addLog(`🚀 ¡${player.name} pasa por la SALIDA! Cobra $200`, 'money');
+      addLog('events.passGoCollect', { player: player.name, amount: 200 }, 'money');
       setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, money: p.money + 200 } : p));
       setPhase('endturn');
       return;
     }
 
     if (sq.type === 'gotojail') {
-      addLog(`🌀 ¡TELETRANSPORTE a la CÁRCEL! ${player.name} desaparece de la existencia momentáneamente...`, 'event');
+      addLog('events.teleportToJail', { player: player.name }, 'event');
       playSound('jail');
       setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, position: 10, inJail: true, jailTurns: 0 } : p));
       setPhase('endturn');
@@ -426,7 +433,7 @@ export default function Raulopoly() {
 
     if (sq.type === 'jail' || sq.type === 'freeparking') {
       if (sq.type === 'freeparking') {
-        addLog(`🎰 ¡${player.name} cae en el JACKPOT GALÁCTICO! Cobra $${jackpot}!`, 'event');
+        addLog('events.jackpotCollect', { player: player.name, amount: jackpot }, 'event');
         setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, money: p.money + jackpot } : p));
         setJackpot(500); // reset
       }
@@ -436,7 +443,7 @@ export default function Raulopoly() {
 
     if (sq.type === 'tax') {
       const amount = sq.amount;
-      addLog(`💸 ${player.name} paga $${amount} de impuestos al Jackpot Galáctico.`, 'money');
+      addLog('events.payTaxToJackpot', { player: player.name, amount }, 'money');
       setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, money: Math.max(0, p.money - amount) } : p));
       setJackpot(jp => jp + amount);
       setPhase('endturn');
@@ -467,11 +474,11 @@ export default function Raulopoly() {
           setPendingBuy({ squareId, price: sq.price });
           setPhase('buydecision');
         } else {
-          addLog(`😢 ${player.name} no puede comprar ${sq.name} (le faltan fondos galácticos).`, 'normal');
+          addLog('events.cannotBuy', { player: player.name, square: sq.name }, 'normal');
           setPhase('endturn');
         }
       } else if (owner === playerIdx) {
-        addLog(`🏠 ${player.name} está en su propia propiedad. ¡Al menos alguien lo visita!`, 'normal');
+        addLog('events.ownProperty', { player: player.name }, 'normal');
         setPhase('endturn');
       } else {
         const rent = calcRent(squareId, diceTotal, playerIdx);
@@ -480,7 +487,7 @@ export default function Raulopoly() {
           setPhase('payrent');
         } else {
           if (player.nextTurnFree) {
-            addLog(`🛡️ ¡${player.name} usa su ESCUDO DIMENSIONAL! Alquiler evitado.`, 'event');
+            addLog('events.shieldUsed', { player: player.name }, 'event');
             setPlayers(prev => prev.map((p, i) => i === playerIdx ? { ...p, nextTurnFree: false } : p));
           }
           setPhase('endturn');
@@ -509,7 +516,7 @@ export default function Raulopoly() {
     if (player.nextDiceX3) {
       d1 = Math.min(d1 * 3, 18);
       d2 = Math.min(d2 * 3, 18);
-      addLog(`🧬 ¡MUTACIÓN ACTIVA! Dados multiplicados x3!`, 'event');
+      addLog('events.mutationActive', {}, 'event');
     }
 
     setDice([d1, d2]);
@@ -523,15 +530,15 @@ export default function Raulopoly() {
 
     if (player.inJail) {
       if (d1 === d2) {
-        addLog(`🎲 ¡DOBLES! ${player.name} escapa de la cárcel.`, 'event');
+        addLog('events.jailEscapeDoubles', { player: player.name }, 'event');
         setPlayers(prev => prev.map((p, i) => i === currentIdx ? { ...p, inJail: false, jailTurns: 0 } : p));
       } else if (player.jailTurns >= 2) {
-        addLog(`⛓️ ${player.name} paga $50 para salir de la cárcel.`, 'money');
+        addLog('events.payJailFine', { player: player.name, amount: 50 }, 'money');
         setPlayers(prev => prev.map((p, i) =>
           i === currentIdx ? { ...p, money: Math.max(0, p.money - 50), inJail: false, jailTurns: 0 } : p
         ));
       } else {
-        addLog(`⛓️ ${player.name} sigue en la cárcel. (Turno ${player.jailTurns + 1}/3)`, 'normal');
+        addLog('events.stayInJail', { player: player.name, turn: player.jailTurns + 1 }, 'normal');
         setPlayers(prev => prev.map((p, i) =>
           i === currentIdx ? { ...p, jailTurns: p.jailTurns + 1 } : p
         ));
@@ -543,18 +550,18 @@ export default function Raulopoly() {
     let newPos;
     if (backward) {
       newPos = ((player.position - total) + 40) % 40;
-      addLog(`⏮️ ¡DADO MALDITO! ${player.name} retrocede ${total} casillas.`, 'event');
+      addLog('events.cursedDieBackwards', { player: player.name, steps: total }, 'event');
     } else {
       newPos = (player.position + total) % 40;
       if (newPos < player.position && !backward) {
-        addLog(`🚀 ${player.name} pasa por la SALIDA. ¡Cobra $200!`, 'money');
+        addLog('events.passGoCollect', { player: player.name, amount: 200 }, 'money');
         setPlayers(prev => prev.map((p, i) => i === currentIdx ? { ...p, money: p.money + 200 } : p));
       }
     }
 
     setPlayers(prev => {
       const next = prev.map((p, i) => i === currentIdx ? { ...p, position: newPos } : p);
-      addLog(`🎲 ${player.name} saca ${d1}+${d2}=${total}${backward ? ' (¡REVERSA!)' : ''}${chaosVal ? ` + Dado del Caos: ${chaosVal} 😱` : ''}`, 'dice');
+      addLog('events.rollResult', { player: player.name, d1, d2, total, backward: backward ? t('events.reverseTag') : '', chaos: chaosVal ? t('events.chaosTag', { chaosVal }) : '' }, 'dice');
 
       if (chaosVal) {
         // Chaos die effect based on value
@@ -570,16 +577,16 @@ export default function Raulopoly() {
     const p = currentPlayers[pidx];
     switch (val) {
       case 1:
-        addLog(`💣 ¡Dado del Caos [1]! ${p.name} pierde $150 adicionales.`, 'chaos');
+        addLog('events.chaosDieLose150', { player: p.name, amount: 150 }, 'chaos');
         setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: Math.max(0, pl.money - 150) } : pl));
         break;
       case 2:
-        addLog(`🎁 ¡Dado del Caos [2]! ${p.name} recibe $100 del banco galáctico.`, 'chaos');
+        addLog('events.chaosDieGain100', { player: p.name, amount: 100 }, 'chaos');
         setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: pl.money + 100 } : pl));
         break;
       case 3:
         const rp = (pidx + 1) % currentPlayers.length;
-        addLog(`🔀 ¡Dado del Caos [3]! ${p.name} INTERCAMBIA POSICIÓN con ${currentPlayers[rp].name}!`, 'chaos');
+        addLog('events.chaosDieSwap', { player: p.name, target: currentPlayers[rp].name }, 'chaos');
         setPlayers(prev => {
           const next = prev.map(pl => ({ ...pl }));
           const posA = next[pidx].position;
@@ -589,15 +596,15 @@ export default function Raulopoly() {
         });
         break;
       case 4:
-        addLog(`⏩ ¡Dado del Caos [4]! ${p.name} avanza 6 casillas extra.`, 'chaos');
+        addLog('events.chaosDieAdvance6', { player: p.name, steps: 6 }, 'chaos');
         setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: (pl.position + 6) % 40 } : pl));
         break;
       case 5:
-        addLog(`😇 ¡Dado del Caos [5]! ${p.name} es INMUNE al próximo alquiler.`, 'chaos');
+        addLog('events.chaosDieShield', { player: p.name }, 'chaos');
         setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, nextTurnFree: true } : pl));
         break;
       case 6:
-        addLog(`🌪️ ¡Dado del Caos [6]! ¡TORMENTA TOTAL! Todos pierden $100.`, 'chaos');
+        addLog('events.chaosDieStorm', { amount: 100 }, 'chaos');
         setPlayers(prev => prev.map(pl => ({ ...pl, money: Math.max(0, pl.money - 100) })));
         setJackpot(jp => jp + 100 * currentPlayers.length);
         break;
@@ -614,19 +621,19 @@ export default function Raulopoly() {
       switch (card.id) {
         case 'goToGo':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: 0, money: pl.money + 200 } : pl));
-          addLog(`🚀 ${p.name} avanza a la SALIDA y cobra $200.`, 'move');
+          addLog('events.cardAdvanceGo', { player: p.name, amount: 200 }, 'move');
           break;
         case 'goTo5':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: 5 } : pl));
-          addLog(`🛸 ${p.name} vuela a la Estación Norte.`, 'move');
+          addLog('events.cardGoNorthStation', { player: p.name }, 'move');
           break;
         case 'nextBackward':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, nextTurnBackward: true } : pl));
-          addLog(`🔄 ${p.name} recibirá el DADO MALDITO en su próximo turno.`, 'event');
+          addLog('events.cardNextBackward', { player: p.name }, 'event');
           break;
         case 'goToJail':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: 10, inJail: true, jailTurns: 0 } : pl));
-          addLog(`⛓️ ${p.name} va directamente a la CÁRCEL.`, 'event');
+          addLog('events.cardGoJail', { player: p.name }, 'event');
           break;
         case 'collect150':
           let total150 = 0;
@@ -640,26 +647,26 @@ export default function Raulopoly() {
               return pl;
             });
             next[pidx] = { ...next[pidx], money: next[pidx].money + total150 };
-            addLog(`💰 ${p.name} cobra $150 de cada jugador. Total: $${total150}`, 'money');
+            addLog('events.cardCollect150Each', { player: p.name, total: total150, amount: 150 }, 'money');
             return next;
           });
           break;
         case 'pay200':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: Math.max(0, pl.money - 200) } : pl));
           setJackpot(jp => jp + 200);
-          addLog(`💸 ${p.name} paga $200 al banco por "terremoto fiscal".`, 'money');
+          addLog('events.cardPay200', { player: p.name, amount: 200 }, 'money');
           break;
         case 'outOfJail':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, freeJailCards: pl.freeJailCards + 1 } : pl));
-          addLog(`🗝️ ${p.name} obtiene una carta "Salida Libre de la Cárcel".`, 'event');
+          addLog('events.cardOutOfJail', { player: p.name }, 'event');
           break;
         case 'gain100':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: pl.money + 100 } : pl));
-          addLog(`🎁 ${p.name} cobra $100 de bonus.`, 'money');
+          addLog('events.cardGain100', { player: p.name, amount: 100 }, 'money');
           break;
         case 'back3':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: ((pl.position - 3) + 40) % 40 } : pl));
-          addLog(`⏮️ ${p.name} retrocede 3 casillas.`, 'move');
+          addLog('events.cardBack3', { player: p.name, steps: 3 }, 'move');
           break;
         case 'nearest': {
           let pos = p.position;
@@ -668,7 +675,7 @@ export default function Raulopoly() {
             const sq = SQUARE_DATA[check];
             if ((sq.type === 'property' || sq.type === 'railroad' || sq.type === 'utility') && propOwners[check] === undefined) {
               setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: check } : pl));
-              addLog(`🧲 ${p.name} avanza a ${sq.name} (primera propiedad libre).`, 'move');
+              addLog('events.cardNearestProperty', { player: p.name, square: sq.name }, 'move');
               break;
             }
           }
@@ -680,7 +687,7 @@ export default function Raulopoly() {
       switch (card.id) {
         case 'allLoseHalf':
           setPlayers(prev => prev.map(pl => ({ ...pl, money: Math.floor(pl.money / 2) })));
-          addLog(`🌪️ ¡TORMENTA GALÁCTICA! Todos pierden la mitad de su dinero.`, 'chaos');
+          addLog('events.chaosCardAllLoseHalf', {}, 'chaos');
           break;
         case 'swapWithRichest': {
           const richest = [...players].filter((_, i) => i !== pidx).sort((a, b) => b.money - a.money)[0];
@@ -692,7 +699,7 @@ export default function Raulopoly() {
               next[richest.id].position = posA;
               return next;
             });
-            addLog(`🔀 ${p.name} intercambia posición con ${richest.name} (el más rico).`, 'chaos');
+            addLog('events.chaosCardSwapRichest', { player: p.name, target: richest.name }, 'chaos');
           }
           break;
         }
@@ -705,28 +712,28 @@ export default function Raulopoly() {
             ids.forEach(id => { delete next[id]; });
             return next;
           });
-          addLog(`☄️ ¡METEORITO! Todas las casas del grupo ${rndGroup} son DESTRUIDAS.`, 'chaos');
+          addLog('events.chaosCardDestroyHouses', { group: rndGroup }, 'chaos');
           break;
         }
         case 'gain500':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: pl.money + 500 } : pl));
-          addLog(`🤑 ${p.name} recibe $500 de la Lotería Mutante.`, 'money');
+          addLog('events.chaosCardGain500', { player: p.name, amount: 500 }, 'money');
           break;
         case 'leftLose300': {
           const left = (pidx - 1 + players.length) % players.length;
           setPlayers(prev => prev.map((pl, i) => i === left ? { ...pl, money: Math.max(0, pl.money - 300) } : pl));
-          addLog(`😈 ${players[left].name} pierde $300 por maldición viral.`, 'money');
+          addLog('events.chaosCardLeftLose300', { player: players[left].name, amount: 300 }, 'money');
           break;
         }
         case 'goMostExpensive': {
           const mostExp = SQUARE_DATA.filter(sq => sq.type === 'property').sort((a, b) => b.price - a.price)[0];
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: mostExp.id } : pl));
-          addLog(`🕳️ ${p.name} es succionado hasta ${mostExp.name}!`, 'chaos');
+          addLog('events.chaosCardGoMostExpensive', { player: p.name, square: mostExp.name }, 'chaos');
           break;
         }
         case 'doubleRent':
           setDoubleRentTurns(2);
-          addLog(`🔥 ¡REVOLUCIÓN! Todos los alquileres se DUPLICAN por 2 turnos.`, 'chaos');
+          addLog('events.chaosCardDoubleRent', { turns: 2 }, 'chaos');
           break;
         case 'steal200each': {
           let stolen = 0;
@@ -740,19 +747,19 @@ export default function Raulopoly() {
               return pl;
             });
             next[pidx] = { ...next[pidx], money: next[pidx].money + stolen };
-            addLog(`🦹 ${p.name} roba $200 de cada jugador. Total: $${stolen}`, 'chaos');
+            addLog('events.chaosCardSteal200Each', { player: p.name, total: stolen, amount: 200 }, 'chaos');
             return next;
           });
           break;
         }
         case 'nextDiceX3':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, nextDiceX3: true } : pl));
-          addLog(`🧬 ${p.name} activó MUTACIÓN GENÉTICA. Próximos dados x3!`, 'chaos');
+          addLog('events.chaosCardNextDiceX3', { player: p.name }, 'chaos');
           break;
         case 'randomTeleport': {
           const rnd = Math.floor(Math.random() * 40);
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: rnd } : pl));
-          addLog(`🌀 ${p.name} es teletransportado a ${SQUARE_DATA[rnd].name}.`, 'chaos');
+          addLog('events.chaosCardRandomTeleport', { player: p.name, square: SQUARE_DATA[rnd].name }, 'chaos');
           break;
         }
         case 'collect100each': {
@@ -767,7 +774,7 @@ export default function Raulopoly() {
               return pl;
             });
             next[pidx] = { ...next[pidx], money: next[pidx].money + col };
-            addLog(`✨ ${p.name} cobra $100 de cada jugador por carisma galáctico.`, 'money');
+            addLog('events.chaosCardCollect100Each', { player: p.name, amount: 100 }, 'money');
             return next;
           });
           break;
@@ -777,21 +784,21 @@ export default function Raulopoly() {
           const charge = ownedCount * 50;
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: Math.max(0, pl.money - charge) } : pl));
           setJackpot(jp => jp + charge);
-          addLog(`💸 ${p.name} paga $${charge} (${ownedCount} propiedades × $50 impuesto kármico).`, 'money');
+          addLog('events.chaosCardPayPerProp', { player: p.name, charge, ownedCount }, 'money');
           break;
         }
         case 'nextTurnFree':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, nextTurnFree: true } : pl));
-          addLog(`🛡️ ${p.name} activa ESCUDO DIMENSIONAL. Próximo alquiler: gratis.`, 'event');
+          addLog('events.chaosCardNextTurnFree', { player: p.name }, 'event');
           break;
         case 'bankCharge400':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, money: Math.max(0, pl.money - 400) } : pl));
           setJackpot(jp => jp + 400);
-          addLog(`🏦 ${p.name} paga $400 por "cuotas de rescate dimensional".`, 'money');
+          addLog('events.chaosCardBankCharge400', { player: p.name, amount: 400 }, 'money');
           break;
         case 'backToStart':
           setPlayers(prev => prev.map((pl, i) => i === pidx ? { ...pl, position: 0 } : pl));
-          addLog(`👻 ${p.name} retrocede al inicio por bucle temporal. Sin cobrar $200.`, 'chaos');
+          addLog('events.chaosCardBackToStart', { player: p.name }, 'chaos');
           break;
         case 'ghostSteal':
           if (players.filter((_, i) => i !== pidx && players[i].alive).length > 0) {
@@ -802,7 +809,7 @@ export default function Raulopoly() {
           break;
         case 'jackpotBonus':
           setJackpot(jp => jp * 2);
-          addLog(`🎰 ¡BONUS! El Jackpot Galáctico se DUPLICA a $${jackpot * 2}!`, 'chaos');
+          addLog('events.chaosCardJackpotBonus', { amount: jackpot * 2 }, 'chaos');
           break;
       }
     }
@@ -816,13 +823,13 @@ export default function Raulopoly() {
       i === currentIdx ? { ...p, money: p.money - sq.price } : p
     ));
     setPropOwners(prev => ({ ...prev, [squareId]: currentIdx }));
-    addLog(`🏠 ${players[currentIdx].name} compra ${sq.name} por $${sq.price}!`, 'buy');
+    addLog('events.buyProperty', { player: players[currentIdx].name, square: sq.name, price: sq.price }, 'buy');
     setPendingBuy(null);
     setPhase('build');
   }
 
   function skipBuy() {
-    addLog(`😒 ${players[currentIdx].name} pasa de comprar. Una oportunidad galáctica perdida.`, 'normal');
+    addLog('events.skipBuy', { player: players[currentIdx].name }, 'normal');
     setPendingBuy(null);
     setPhase('endturn');
   }
@@ -830,7 +837,7 @@ export default function Raulopoly() {
   function payRent() {
     const { rent, ownerIdx, squareId } = pendingRent;
     const sq = SQUARE_DATA[squareId];
-    addLog(`💸 ${players[currentIdx].name} paga $${rent} de alquiler a ${players[ownerIdx].name} por ${sq.name}.`, 'money');
+    addLog('events.payRent', { player: players[currentIdx].name, rent, owner: players[ownerIdx].name, square: sq.name }, 'money');
     const actual = Math.min(rent, players[currentIdx].money);
     setPlayers(prev => prev.map((p, i) => {
       if (i === currentIdx) return { ...p, money: Math.max(0, p.money - actual) };
@@ -858,16 +865,371 @@ export default function Raulopoly() {
     if (players[currentIdx].money < sq.houseCost) return;
     setPlayers(prev => prev.map((p, i) => i === currentIdx ? { ...p, money: p.money - sq.houseCost } : p));
     setPropHouses(prev => ({ ...prev, [squareId]: houses + 1 }));
-    addLog(`🏗️ ${players[currentIdx].name} construye una ${houses === 4 ? 'FORTALEZA' : 'casa'} en ${sq.name}.`, 'buy');
+    addLog('events.buildHouse', { player: players[currentIdx].name, houseType: houses === 4 ? t('events.fortress') : t('events.house'), square: sq.name }, 'buy');
   }
 
 
   const CELL_SIZE = 54;
   const BOARD_SIZE = 11 * CELL_SIZE;
 
+  function renderSquare(sq) {
+    const { r, c } = getGridPos(sq.id);
+    const rotation = getSquareRotation(sq.id);
+    const isCorner = [0, 10, 20, 30].includes(sq.id);
+    const owner = propOwners[sq.id];
+    const ownerColor = owner !== undefined ? PLAYER_CONFIGS[owner].color : null;
+    const houses = propHouses[sq.id] || 0;
+    const groupColor = sq.group ? GROUP_COLORS[sq.group] : null;
+
+    const playersHere = players.filter(p => p.position === sq.id && p.alive);
+    const ghostsHere  = players.filter(p => p.position === sq.id && p.isGhost);
+
+    return (
+      <div
+        key={sq.id}
+        style={{
+          position: 'absolute',
+          left: c * CELL_SIZE,
+          top: r * CELL_SIZE,
+          width: CELL_SIZE,
+          height: CELL_SIZE,
+          border: '1px solid #1a2a3a',
+          boxSizing: 'border-box',
+          background: ownerColor ? `${ownerColor}22` : '#0a1520',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'default',
+        }}
+      >
+        {/* Color stripe */}
+        {groupColor && (
+          <div style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0,
+            height: 8,
+            background: groupColor,
+            boxShadow: `0 0 6px ${groupColor}`,
+          }}/>
+        )}
+        {/* Owner dot */}
+        {ownerColor && (
+          <div style={{
+            position: 'absolute',
+            bottom: 2, right: 2,
+            width: 8, height: 8,
+            borderRadius: '50%',
+            background: ownerColor,
+            boxShadow: `0 0 5px ${ownerColor}`,
+          }}/>
+        )}
+        {/* Houses */}
+        {houses > 0 && (
+          <div style={{ position: 'absolute', top: 9, left: 2, fontSize: 8, color: '#0f0' }}>
+            {houses === 5 ? '🏰' : '🏠'.repeat(houses)}
+          </div>
+        )}
+        {/* Content */}
+        <div style={{
+          transform: `rotate(${rotation}deg)`,
+          textAlign: 'center',
+          padding: '0 2px',
+          marginTop: groupColor ? 6 : 0,
+          width: '100%',
+        }}>
+          {isCorner ? (
+            <div style={{ fontSize: 18 }}>{sq.icon || sq.name.slice(0,2)}</div>
+          ) : (
+            <>
+              <div style={{ fontSize: 6, color: '#8899aa', lineHeight: 1.1, wordBreak: 'break-word' }}>
+                {sq.name}
+              </div>
+              {sq.price > 0 && (
+                <div style={{ fontSize: 7, color: '#44ccff', marginTop: 1 }}>${sq.price}</div>
+              )}
+            </>
+          )}
+        </div>
+        {/* Player tokens */}
+        {playersHere.length > 0 && (
+          <div style={{
+            position: 'absolute',
+            bottom: 2, left: 2,
+            display: 'flex', flexWrap: 'wrap', gap: 1,
+          }}>
+            {playersHere.map(p => (
+              <div key={p.id} style={{
+                width: 10, height: 10,
+                borderRadius: '50%',
+                background: p.color,
+                boxShadow: `0 0 4px ${p.glow}`,
+                fontSize: 7,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {p.emoji}
+              </div>
+            ))}
+            {ghostsHere.map(p => (
+              <div key={`g${p.id}`} style={{ fontSize: 8, opacity: 0.6 }}>👻</div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const getSquareInfo = (squareType) => {
+    return squareInfo[squareType] || t('unknownSquare', { returnObjects: true });
+  };
+
+  function renderCenter() {
+    const p = players[currentIdx];
+    if (!p) return null;
+    const logColors = { normal: '#8899aa', money: '#44ffaa', event: '#ff9944', chaos: '#ff4488', dice: '#44aaff', move: '#aaffaa', buy: '#ffdd44' };
+
+    return (
+      <div style={{
+        position: 'absolute',
+        left: CELL_SIZE + 1,
+        top: CELL_SIZE + 1,
+        width: 9 * CELL_SIZE - 2,
+        height: 9 * CELL_SIZE - 2,
+        background: '#060e18',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 8,
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+      }}>
+        {/* Title */}
+        <div style={{ textAlign: 'center', marginBottom: 2 }}>
+          <div style={{
+            fontFamily: '"Orbitron", sans-serif',
+            fontSize: 22,
+            fontWeight: 900,
+            background: 'linear-gradient(90deg, #ff4488, #44aaff, #44ff88)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: 3,
+            textShadow: 'none',
+          }}>RAULOPOLY</div>
+          {doubleRentTurns > 0 && (
+            <div style={{ fontSize: 9, color: '#ff4444', fontFamily: 'monospace' }}>
+              🔥 ALQUILERES x2 ({doubleRentTurns} turnos)
+            </div>
+          )}
+        </div>
+
+        {/* Players */}
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: 'center', width: '100%' }}>
+          {players.map((pl, i) => (
+            <div key={pl.id} style={{
+              background: i === currentIdx ? `${pl.color}22` : '#0a1520',
+              border: `1px solid ${i === currentIdx ? pl.color : '#1a2a3a'}`,
+              borderRadius: 6,
+              padding: '3px 6px',
+              textAlign: 'center',
+              minWidth: 58,
+              boxShadow: i === currentIdx ? `0 0 8px ${pl.glow}` : 'none',
+              opacity: pl.alive ? 1 : 0.5,
+            }}>
+              <div style={{ fontSize: 13 }}>{pl.isGhost ? '👻' : pl.emoji}</div>
+              <div style={{ fontSize: 8, color: pl.color, fontFamily: '"Orbitron", sans-serif' }}>
+                {pl.name.slice(0, 8)}
+              </div>
+              <div style={{ fontSize: 10, color: '#44ffaa', fontFamily: 'monospace' }}>
+                ${pl.money}
+              </div>
+              {pl.freeJailCards > 0 && <div style={{ fontSize: 7, color: '#ffdd44' }}>🗝️x{pl.freeJailCards}</div>}
+              {pl.nextTurnFree && <div style={{ fontSize: 7, color: '#44ffaa' }}>🛡️</div>}
+            </div>
+          ))}
+        </div>
 
 
-  const btnStyle = useCallback((color, small = false) => ({
+        {/* Dice */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {[dice[0], dice[1]].map((d, i) => (
+            <div key={i} style={{
+              width: 32, height: 32,
+              background: '#0a2030',
+              border: '2px solid #44aaff',
+              borderRadius: 6,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18,
+              boxShadow: animDice ? '0 0 15px #44aaff' : '0 0 4px #44aaff44',
+              transition: 'all 0.2s',
+              transform: animDice ? 'rotate(20deg) scale(1.2)' : 'rotate(0deg) scale(1)',
+            }}>
+              {['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][d]}
+            </div>
+          ))}
+          {chaosDie !== null && (
+            <div style={{
+              width: 32, height: 32,
+              background: '#2a0a20',
+              border: '2px solid #ff4488',
+              borderRadius: 6,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18,
+              boxShadow: '0 0 12px #ff4488',
+            }}>
+              {['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][chaosDie]}
+            </div>
+          )}
+          {chaosDie !== null && (
+            <div style={{ fontSize: 8, color: '#ff4488' }}>¡Dado<br/>del Caos!</div>
+          )}
+        </div>
+
+        {/* ACTION AREA */}
+        <div style={{ textAlign: 'center', width: '100%' }}>
+          {phase === 'roll' && !p.isGhost && (
+            <div>
+              <div style={{ fontSize: 10, color: p.color, marginBottom: 4, fontFamily: '"Orbitron", sans-serif' }}>
+                Turno de {p.emoji} {p.name}
+              </div>
+              {/* Timer bar */}
+              <div style={{ width: '100%', marginBottom: 6, background: '#000', border: '1px solid #444', borderRadius: 2, height: 8, overflow: 'hidden' }}>
+                <div style={{
+                  width: `${(turnTimer/60)*100}%`,
+                  height: '100%',
+                  background: turnTimer > 20 ? '#44ff88' : turnTimer > 10 ? '#ffaa00' : '#ff4444',
+                  transition: 'width 0.3s, background 0.3s',
+                }}></div>
+              </div>
+              <div style={{ fontSize: 8, color: '#8899aa', marginBottom: 6 }}>{t('turnTime')} {turnTimer}s</div>
+              <button onClick={doRoll} style={btnStyle('#44aaff')}>
+                🎲 {t('rollDice')}
+              </button>
+            </div>
+          )}
+          {phase === 'roll' && p.isGhost && (
+            <div>
+              <div style={{ fontSize: 10, color: '#ff8888' }}>👻 {p.name} es un FANTASMA. Elige a quién molestar:</div>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
+                {players.filter((_, i) => i !== currentIdx && players[i].alive).map(pl => (
+                  <button key={pl.id} style={btnStyle(pl.color, true)} onClick={() => {
+                    addLog('events.ghostHaunt', { ghost: p.name, target: pl.name, amount: 150 }, 'chaos');
+                    setPlayers(prev => prev.map((x, i) => i === pl.id ? { ...x, money: Math.max(0, x.money - 150) } : x));
+                    doEndTurn();
+                  }}>
+                    {pl.emoji} {pl.name}
+                  </button>
+                ))}
+                <button style={btnStyle('#666', true)} onClick={doEndTurn}>Pasar</button>
+              </div>
+            </div>
+          )}
+          {phase === 'buydecision' && pendingBuy && (
+            <div>
+              <div style={{ fontSize: 10, color: '#ffdd44', marginBottom: 4 }}>
+                ¿Comprar <strong>{SQUARE_DATA[pendingBuy.squareId].name}</strong> por ${pendingBuy.price}?
+              </div>
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                <button onClick={() => buyProperty(pendingBuy.squareId)} style={btnStyle('#44ffaa')}>💰 COMPRAR</button>
+                <button onClick={skipBuy} style={btnStyle('#ff4444')}>❌ Pasar</button>
+              </div>
+            </div>
+          )}
+          {phase === 'payrent' && pendingRent && (
+            <div>
+              <div style={{ fontSize: 10, color: '#ff8888', marginBottom: 4 }}>
+                {t('events.payRentPrompt', { rent: pendingRent.rent, owner: players[pendingRent.ownerIdx]?.name })}
+                {players[currentIdx].freeJailCards > 0 && ` ${t('events.jailShieldNoUse')}`}
+              </div>
+              <button onClick={payRent} style={btnStyle('#ff4488')}>💸 {t('events.payRentButton')}</button>
+            </div>
+          )}
+          {phase === 'card' && activeCard && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 16 }}>{activeCard.emoji}</div>
+              <div style={{ fontSize: 10, color: activeCard.source === 'chest' ? '#ff4488' : '#44aaff', fontFamily: '"Orbitron", sans-serif' }}>
+                {t(`${getCardI18nPrefix(activeCard)}.${activeCard.id}.title`)}
+              </div>
+              <div style={{ fontSize: 9, color: '#ccc', margin: '2px 0', lineHeight: 1.3 }}>
+                {t(`${getCardI18nPrefix(activeCard)}.${activeCard.id}.text`)}
+              </div>
+              <button onClick={() => applyCardEffect(activeCard, currentIdx)} style={btnStyle('#ff9944')}>
+                ⚡ EJECUTAR EFECTO
+              </button>
+            </div>
+          )}
+          {phase === 'ghoststeal' && (
+            <div>
+              <div style={{ fontSize: 10, color: '#ff4488' }}>👻 {t('events.ghostStealPrompt')}</div>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
+                {players.filter((_, i) => i !== currentIdx && players[i].alive && Object.values(propOwners).some(o => o === i)).map(pl => (
+                  <button key={pl.id} style={btnStyle(pl.color, true)} onClick={() => {
+                    const theirProps = Object.entries(propOwners).filter(([, o]) => o === pl.id);
+                    if (theirProps.length > 0) {
+                      const [stolenId] = theirProps[Math.floor(Math.random() * theirProps.length)];
+                      setPropOwners(prev => ({ ...prev, [stolenId]: currentIdx }));
+                      addLog('events.ghostStealProperty', { player: players[currentIdx].name, square: SQUARE_DATA[stolenId].name, target: pl.name }, 'chaos');
+                    }
+                    setActiveCard(null);
+                    setPendingGhostSteal(null);
+                    setPhase('endturn');
+                  }}>
+                    {pl.emoji} {pl.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {phase === 'build' && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 9, color: '#aaffaa', marginBottom: 3 }}>
+                🏗️ ¿Construir en alguna propiedad? (Si tienes monopolio)
+              </div>
+              <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center', maxHeight: 40, overflowY: 'auto' }}>
+                {Object.entries(propOwners)
+                  .filter(([id, o]) => o === currentIdx && SQUARE_DATA[id]?.type === 'property' && hasMonopoly(currentIdx, SQUARE_DATA[id].group) && (propHouses[id] || 0) < 5)
+                  .map(([id]) => (
+                    <button key={id} style={{ ...btnStyle(GROUP_COLORS[SQUARE_DATA[id].group] || '#888', true), fontSize: 8, padding: '2px 6px' }}
+                      onClick={() => buildHouse(Number(id))}>
+                      🏠 {SQUARE_DATA[id].name.slice(0, 10)}
+                    </button>
+                  ))}
+              </div>
+              <button onClick={doEndTurn} style={btnStyle('#666')}>➡️ Fin del Turno</button>
+            </div>
+          )}
+          {phase === 'endturn' && (
+            <button onClick={doEndTurn} style={btnStyle('#666')}>➡️ Terminar Turno</button>
+          )}
+        </div>
+
+        {/* Log */}
+        <div style={{
+          width: '100%',
+          height: 55,
+          overflowY: 'auto',
+          background: '#050d15',
+          borderRadius: 4,
+          padding: '2px 4px',
+          boxSizing: 'border-box',
+        }}>
+          {log.slice(0, 8).map((entry, i) => (
+            <div key={entry.id} style={{
+              fontSize: 8,
+              color: logColors[entry.type] || '#8899aa',
+              lineHeight: 1.3,
+              opacity: 1 - i * 0.08,
+            }}>
+              {entry.key ? t(entry.key, entry.params) : entry.message}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const btnStyle = (color, small = false) => ({
     background: `${color}22`,
     border: `1px solid ${color}`,
     color: color,
@@ -950,7 +1312,7 @@ export default function Raulopoly() {
           boxShadow: '0 0 40px #44aaff44, inset 0 0 20px #44aaff11',
         }} role="dialog" aria-modal="true" aria-labelledby="tutorial-dialog-title">
           <div style={{ fontSize: 48, fontWeight: 900, marginBottom: 20 }}>🔍</div>
-          <div id="tutorial-dialog-title" style={{ fontSize: 32, fontWeight: 900, color: '#44aaff', marginBottom: 12, letterSpacing: 2 }}>
+          <div style={{ fontSize: 32, fontWeight: 900, color: '#44aaff', marginBottom: 12, letterSpacing: 2 }}>
             {t('tutorialIntro')}
           </div>
           <div style={{ fontSize: 14, color: '#8899aa', marginBottom: 30, lineHeight: 1.6 }}>
@@ -982,7 +1344,7 @@ export default function Raulopoly() {
               setTutorialSeen(true);
               setShowTutorial(false);
               setScreen('rules');
-            }} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '10px 30px', width: 'auto' }} ref={tutorialCloseButtonRef}>
+            }} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '10px 30px', width: 'auto' }}>
               {t('startGame')}
             </button>
             <button onClick={() => {
@@ -1072,7 +1434,7 @@ export default function Raulopoly() {
             <button onClick={loadGame} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '8px 20px' }}>
               ⏳ REANUDAR ÚTIMA PARTIDA
             </button>
-            <button onClick={() => { clearSavedGame(); setHasSavedGame(false); }} style={{ ...btnStyle('#aa4444'), fontSize: 12, padding: '6px 12px' }}>
+            <button onClick={() => { localStorage.removeItem('raulopolyGame'); setHasSavedGame(false); }} style={{ ...btnStyle('#aa4444'), fontSize: 12, padding: '6px 12px' }}>
               {t('delete')}
             </button>
           </div>
@@ -1285,8 +1647,8 @@ export default function Raulopoly() {
             overflowY: 'auto',
             fontFamily: '"Orbitron", sans-serif',
             color: '#fff',
-          }} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="help-dialog-title" ref={helpDialogRef}>
-            <div id="help-dialog-title" style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: '#44aaff' }}>{t('helpTitle')}</div>
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12, color: '#44aaff' }}>{t('helpTitle')}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 11 }}>
               {Object.entries(squareInfo).map(([key, info]) => (
                 <div key={key} style={{ background: '#0a2030', border: '1px solid #1a3a4a', borderRadius: 4, padding: 8 }}>
@@ -1295,7 +1657,7 @@ export default function Raulopoly() {
                 </div>
               ))}
             </div>
-            <button onClick={() => setShowHelp(false)} style={{ ...btnStyle('#44aaff'), marginTop: 12, width: '100%' }} ref={helpCloseButtonRef}>
+            <button onClick={() => setShowHelp(false)} style={{ ...btnStyle('#44aaff'), marginTop: 12, width: '100%' }}>
               {t('close')}
             </button>
           </div>
@@ -1303,8 +1665,98 @@ export default function Raulopoly() {
       )}
       {/* Top-right controls */}
       <div style={{ position: 'fixed', top: 10, right: 10, display: 'flex', gap: 8, zIndex: 100 }}>
-        <button onClick={() => setShowHelp(!showHelp)} style={{ ...btnStyle('#ffaa00'), fontSize: 14 }} aria-label="Abrir ayuda" title="Abrir ayuda">
+        <button onClick={() => setShowHelp(!showHelp)} style={{ ...btnStyle('#ffaa00'), fontSize: 14 }}>
           {t('help')}
+        </button>
+        <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 11 }}>ES</button>
+        <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 11 }}>EN</button>
+      </div>
+      <div style={{ position: 'relative', width: BOARD_SIZE, height: BOARD_SIZE, flexShrink: 0 }}>
+        {/* Board border glow */}
+        <div style={{
+          position: 'absolute',
+          inset: -2,
+          border: '2px solid #44aaff',
+          boxShadow: '0 0 20px #44aaff44, inset 0 0 20px #44aaff11',
+          borderRadius: 4,
+          pointerEvents: 'none',
+        }}/>
+        {/* Squares */}
+        {SQUARE_DATA.map(sq => renderSquare(sq))}
+        {/* Center panel */}
+        {renderCenter()}
+      </div>
+
+      {/* Right panel - property list */}
+      <div style={{
+        marginLeft: 12,
+        width: 200,
+        height: BOARD_SIZE,
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+      }}>
+        <div style={{ fontFamily: '"Orbitron", sans-serif', fontSize: 10, color: '#44aaff', marginBottom: 4 }}>
+          {t('propertyMap')}
+        </div>
+        {Object.entries(GROUP_SQUARES).map(([group, ids]) => (
+          <div key={group} style={{
+            background: '#0a1520',
+            border: `1px solid ${GROUP_COLORS[group]}44`,
+            borderLeft: `3px solid ${GROUP_COLORS[group]}`,
+            borderRadius: 4,
+            padding: '4px 6px',
+          }}>
+            <div style={{ fontSize: 8, color: GROUP_COLORS[group], fontFamily: '"Orbitron", sans-serif', marginBottom: 2 }}>
+              {group.toUpperCase()}
+            </div>
+            {ids.map(id => {
+              const owner = propOwners[id];
+              const houses = propHouses[id] || 0;
+              const sq = SQUARE_DATA[id];
+              return (
+                <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 1 }}>
+                  <div style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: owner !== undefined ? PLAYER_CONFIGS[owner].color : '#333',
+                  }}/>
+                  <div style={{ fontSize: 7, color: owner !== undefined ? '#ccc' : '#445566', flex: 1 }}>
+                    {sq.name}
+                  </div>
+                  {houses > 0 && (
+                    <div style={{ fontSize: 7, color: '#44ff88' }}>
+                      {houses === 5 ? '🏰' : `🏠${houses}`}
+                    </div>
+                  )}
+                  {owner !== undefined && (
+                    <div style={{ fontSize: 9 }}>{PLAYER_CONFIGS[owner].emoji}</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+        {/* Railroads + Utilities */}
+        <div style={{
+          background: '#0a1520', border: '1px solid #334455', borderRadius: 4, padding: '4px 6px',
+        }}>
+          <div style={{ fontSize: 8, color: '#888', fontFamily: '"Orbitron", sans-serif', marginBottom: 2 }}>{t('otherProperties')}</div>
+          {[...RAILROADS, ...UTILITIES].map(id => {
+            const owner = propOwners[id];
+            const sq = SQUARE_DATA[id];
+            return (
+              <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 1 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: owner !== undefined ? PLAYER_CONFIGS[owner].color : '#333' }}/>
+                <div style={{ fontSize: 7, color: owner !== undefined ? '#ccc' : '#445566', flex: 1 }}>{sq.name}</div>
+                {owner !== undefined && <div style={{ fontSize: 9 }}>{PLAYER_CONFIGS[owner].emoji}</div>}
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={() => { if (window.confirm(t('exitConfirmation'))) setScreen('menu'); }}
+          style={{ ...btnStyle('#333', true), marginTop: 8, width: '100%' }}>
+          {t('exit')}
         </button>
         <button onClick={() => setLanguage('es')} style={{ ...btnStyle(language === 'es' ? '#44ff88' : '#334455'), fontSize: 11 }} aria-label="Cambiar idioma a español" title="Cambiar idioma a español">ES</button>
         <button onClick={() => setLanguage('en')} style={{ ...btnStyle(language === 'en' ? '#44ff88' : '#334455'), fontSize: 11 }} aria-label="Switch language to English" title="Switch language to English">EN</button>

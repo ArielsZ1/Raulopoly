@@ -281,6 +281,10 @@ export default function Raulopoly() {
   const [language, setLanguage] = useState('es'); // 'es' o 'en'
   const [turnTimer, setTurnTimer] = useState(60);
   const [showHelp, setShowHelp] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(() => {
+    const seen = localStorage.getItem('raulopolyTutorialSeen');
+    return !seen; // Mostrar solo si no ha sido visto
+  });
 
   // Objeto de traducciones
   const TRANSLATIONS = {
@@ -331,6 +335,19 @@ export default function Raulopoly() {
       turnTime: 'Time left:',
       helpTitle: 'Help - Square Types',
       close: 'Close',
+      tutorial: 'Interactive Tutorial',
+      tutorialIntro: 'Welcome to RAULOPOLY!',
+      tutorialDesc: 'Your goal is to become the richest player while navigating a chaotic galactic board. Buy properties, collect rent, and survive the chaos!',
+      features: [
+        { title: '🎲 Chaos Die', desc: '30% wild effects each turn' },
+        { title: '👻 Ghost Mode', desc: 'Bankrupt players become vengeful specters' },
+        { title: '🎰 Galactic Jackpot', desc: 'Free parking accumulates REAL money' },
+        { title: '☄️ Meteorites', desc: 'Houses can be destroyed anytime' },
+        { title: '🔀 Teleporters', desc: 'The board moves you where you don\'t want' },
+        { title: '🦹 Quantum Theft', desc: 'You can steal money and properties from others' },
+      ],
+      startGame: 'Start Game',
+      skipTutorial: 'Skip Tutorial',
     }
   };
 
@@ -1339,6 +1356,77 @@ export default function Raulopoly() {
 
   // ========================= SCREENS =========================
 
+  // Tutorial Screen
+  if (showTutorial) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'radial-gradient(ellipse at center, #0a1525 0%, #020812 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: '"Orbitron", sans-serif',
+        color: '#fff',
+        padding: 20,
+      }}>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+        <div style={{
+          background: 'linear-gradient(135deg, #0a1525 0%, #1a0525 100%)',
+          border: '2px solid #44aaff',
+          borderRadius: 12,
+          padding: 40,
+          maxWidth: 700,
+          textAlign: 'center',
+          boxShadow: '0 0 40px #44aaff44, inset 0 0 20px #44aaff11',
+        }}>
+          <div style={{ fontSize: 48, fontWeight: 900, marginBottom: 20 }}>🔍</div>
+          <div style={{ fontSize: 32, fontWeight: 900, color: '#44aaff', marginBottom: 12, letterSpacing: 2 }}>
+            {t.tutorialIntro}
+          </div>
+          <div style={{ fontSize: 14, color: '#8899aa', marginBottom: 30, lineHeight: 1.6 }}>
+            {t.tutorialDesc}
+          </div>
+          
+          {/* Features List */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 30 }}>
+            {t.features.map((feature, i) => (
+              <div key={i} style={{
+                background: '#0a1520',
+                border: '1px solid #1a2a3a',
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 11,
+              }}>
+                <div style={{ fontSize: 20, marginBottom: 6 }}>{feature.title.split(' ')[0]}</div>
+                <div style={{ color: '#ccc', fontWeight: 'bold', marginBottom: 4 }}>
+                  {feature.title.split(' ').slice(1).join(' ')}
+                </div>
+                <div style={{ color: '#668899', fontSize: 10 }}>{feature.desc}</div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <button onClick={() => {
+              localStorage.setItem('raulopolyTutorialSeen', 'true');
+              setShowTutorial(false);
+              setScreen('rules');
+            }} style={{ ...btnStyle('#44ff88'), fontSize: 14, padding: '10px 30px', width: 'auto' }}>
+              {t.startGame}
+            </button>
+            <button onClick={() => {
+              localStorage.setItem('raulopolyTutorialSeen', 'true');
+              setShowTutorial(false);
+            }} style={{ ...btnStyle('#666'), fontSize: 12, padding: '8px 20px', width: 'auto' }}>
+              {t.skipTutorial}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (screen === 'winner') {
     return (
       <div style={{
@@ -1400,17 +1488,10 @@ export default function Raulopoly() {
           {t.subtitle}
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 600, fontSize: 11, color: '#667788' }}>
-          {[
-            ['🎲 Dado del Caos', '30% de efectos salvajes en cada turno'],
-            ['👻 Modo Fantasma', 'Los arruinados se convierten en espectros vengativos'],
-            ['🎰 Jackpot Galáctico', 'El parking libre acumula dinero REAL'],
-            ['☄️ Meteoritos', 'Las casas pueden ser destruidas en cualquier momento'],
-            ['🔀 Teletransportadores', 'El tablero te mueve a donde no quieres'],
-            ['🦹 Robo Cuántico', 'Puedes robar dinero y propiedades a otros'],
-          ].map(([title, desc]) => (
-            <div key={title} style={{ background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: '8px 12px', width: 160, textAlign: 'center' }}>
-              <div style={{ fontSize: 14 }}>{title}</div>
-              <div style={{ fontSize: 9, marginTop: 3, color: '#556677' }}>{desc}</div>
+          {t.features.map(feature => (
+            <div key={feature.title} style={{ background: '#0a1520', border: '1px solid #1a2a3a', borderRadius: 8, padding: '8px 12px', width: 160, textAlign: 'center' }}>
+              <div style={{ fontSize: 14 }}>{feature.title}</div>
+              <div style={{ fontSize: 9, marginTop: 3, color: '#556677' }}>{feature.desc}</div>
             </div>
           ))}
         </div>
@@ -1426,6 +1507,9 @@ export default function Raulopoly() {
         )}
         <button onClick={() => setScreen('rules')} style={{ ...btnStyle('#44aaff'), fontSize: 16, padding: '10px 30px' }}>
           🚀 {t.play}
+        </button>
+        <button onClick={() => setShowTutorial(true)} style={{ ...btnStyle('#ffaa00'), fontSize: 12, padding: '8px 20px' }}>
+          {t.tutorial}
         </button>
         <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }`}</style>
       </div>

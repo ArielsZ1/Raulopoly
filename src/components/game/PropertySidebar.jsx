@@ -3,7 +3,7 @@ import { memo } from "react";
 const ITEM_ROW_STYLE = { display: 'flex', alignItems: 'center', gap: 3, marginBottom: 1 };
 const OWNER_DOT_STYLE = { width: 6, height: 6, borderRadius: '50%' };
 
-const PropertySidebar = memo(function PropertySidebar({
+function PropertySidebarComponent({
   boardSize,
   t,
   groupSquares,
@@ -55,6 +55,8 @@ const PropertySidebar = memo(function PropertySidebar({
       <button onClick={onExit} style={{ ...btnStyle('#333', true), marginTop: 8, width: '100%' }} aria-label="Salir de la partida" title="Salir de la partida">{t('exit')}</button>
     </div>
   );
-});
+}
+
+const PropertySidebar = memo(PropertySidebarComponent);
 
 export default PropertySidebar;

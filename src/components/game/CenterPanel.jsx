@@ -2,7 +2,7 @@ import { memo } from "react";
 
 const LOG_COLORS = { normal: '#8899aa', money: '#44ffaa', event: '#ff9944', chaos: '#ff4488', dice: '#44aaff', move: '#aaffaa', buy: '#ffdd44' };
 
-const CenterPanel = memo(function CenterPanel({
+function CenterPanelComponent({
   cellSize,
   players,
   currentIdx,
@@ -82,6 +82,8 @@ const CenterPanel = memo(function CenterPanel({
       </div>
     </div>
   );
-});
+}
+
+const CenterPanel = memo(CenterPanelComponent);
 
 export default CenterPanel;

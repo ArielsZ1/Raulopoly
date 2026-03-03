@@ -89,7 +89,7 @@ const SquareCell = memo(function SquareCell({ sq, cellSize, owner, houses, occup
   );
 });
 
-const Board = memo(function Board({
+function BoardComponent({
   boardSize,
   cellSize,
   squares,
@@ -131,6 +131,8 @@ const Board = memo(function Board({
       {centerPanel}
     </div>
   );
-});
+}
+
+const Board = memo(BoardComponent);
 
 export default Board;

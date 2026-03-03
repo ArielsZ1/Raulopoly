@@ -25,3 +25,7 @@ Este proyecto ahora está configurado para desplegar automáticamente a GitHub P
 Configuración relevante:
 - `vite.config.js` usa `base: '/Raulopoly/'` para servir assets correctamente desde la subruta del repositorio.
 - El workflow de GitHub Actions compila y despliega la carpeta `dist`.
+
+## Troubleshooting (CSP / extensiones)
+
+Si en consola aparecen errores tipo `ReferenceError` del bundle (por ejemplo `Board`, `CenterPanel`, `PropertySidebar`), prueba en ventana incógnito con extensiones desactivadas. Si allí no ocurre, el problema suele ser inyección de scripts por alguna extensión y no la CSP del sitio.

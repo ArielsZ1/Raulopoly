@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "../i18n/I18nProvider";
 import { getTutorialSeen, setTutorialSeen } from "../services/storageService";
 import Board from "./game/Board";
+import CenterPanel from "./game/CenterPanel";
+import PropertySidebar from "./game/PropertySidebar";
 
 // ========================= GAME DATA =========================
 

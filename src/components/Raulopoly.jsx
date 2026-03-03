@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "../i18n/I18nProvider";
+import { getTutorialSeen, setTutorialSeen } from "../services/storageService";
 
 // ========================= GAME DATA =========================
 
@@ -662,7 +663,12 @@ export default function Raulopoly() {
       return false; // Si hay error, no mostrar tutorial
     }
   });
+  // Usamos el servicio de almacenamiento para inicializar el estado
   const [showTutorial, setShowTutorial] = useState(() => !getTutorialSeen());
+
+  // Refs para focus management en diálogos
+  const helpCloseButtonRef = useRef(null);
+  const tutorialCloseButtonRef = useRef(null);
 
   const features = t("features", { returnObjects: true }) || [];
   const squareInfo = t("squareInfo", { returnObjects: true }) || {};

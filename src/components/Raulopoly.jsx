@@ -525,7 +525,7 @@ export default function Raulopoly() {
     } catch (_) {
       // noop: storage unavailable
     }
-    setSavedGame(gameState);
+    setHasSavedGame(true);
   }, [
     screen,
     numPlayers,
